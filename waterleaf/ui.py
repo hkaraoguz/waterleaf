@@ -329,6 +329,7 @@ def build_ui(
                     location = gr.Textbox(
                         label="City (required)",
                         placeholder="Stockholm, Sweden",
+                        value="Stockholm, Sweden",
                     )
                     preferred_time = gr.Textbox(
                         label="Watering time (required)",

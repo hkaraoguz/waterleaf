@@ -47,7 +47,8 @@ def test_ui_contains_dashboard_capture_confirmation_and_export(tmp_path):
         taxonomy=NoopTaxonomy(),
         sample_image="assets/sample-lavender.png",
     )
-    config = json.dumps(demo.get_config_file(), default=str)
+    config_file = demo.get_config_file()
+    config = json.dumps(config_file, default=str)
 
     assert "Waterleaf" in config
     assert "Add plant" in config
@@ -65,6 +66,12 @@ def test_ui_contains_dashboard_capture_confirmation_and_export(tmp_path):
     assert "Example: 7" in config
     assert "Garden location" not in config
     assert "Interval override" not in config
+    city = next(
+        component
+        for component in config_file["components"]
+        if component.get("props", {}).get("label") == "City (required)"
+    )
+    assert city["props"]["value"] == "Stockholm, Sweden"
 
 
 def test_ui_handlers_are_not_exposed_as_public_api(tmp_path):
