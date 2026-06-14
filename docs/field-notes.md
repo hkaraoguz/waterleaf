@@ -15,6 +15,23 @@ possible answer. The current repo supports the hypothesis that a photo can be
 turned into a more useful gardening artifact. It does not yet prove user
 outcomes beyond that.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    U[Gardener] --> G[Gradio Blocks]
+    G --> A[FastAPI application]
+    A --> O[Hugging Face OAuth]
+    A --> S[(SQLite + images\nHF Storage Bucket)]
+    A --> M[Modal proxy-auth endpoint]
+    M --> L[llama.cpp\nGemma 4 26B-A4B GGUF]
+    A --> B[GBIF taxonomy]
+    A --> P[Local care baseline catalog]
+    A --> W[Open-Meteo]
+    A --> I[Whole-garden ICS]
+    I --> C[Apple / Google / Outlook]
+```
+
 ## From image to grounded options
 
 Waterleaf splits plant identification into two jobs on purpose. Gemma is used
@@ -90,12 +107,14 @@ chooses watering dates. It only contributes structured observations that help
 the gardener reach a confirmed species. The schedule comes from local baselines,
 manual input when needed, and explicit weather rules.
 
-That separation also makes the fallback behavior legible. If Open-Meteo data is
-unavailable or malformed, the weather client returns no forecast data. The app
+That separation also makes the fallback behavior legible. If forecast retrieval
+or forecast parsing fails, the weather client returns no forecast rows. The app
 still produces a schedule from the care baseline or manual interval, but it
-loses the rain and heat adjustments that depend on forecast rows. The system
-degrades to a simpler deterministic plan instead of pretending it still has
-weather evidence.
+loses the rain and heat adjustments that depend on forecast rows. By contrast,
+geocoding or location lookup failure stops schedule preview and must be
+corrected before the flow can continue. The system degrades to a simpler
+deterministic plan only when forecast data is unavailable after location has
+already been resolved.
 
 ## The calendar is the product
 
@@ -201,8 +220,16 @@ export that still carries the original image context forward.
 - Architecture: [architecture.md](architecture.md)
 - Demo script: [demo-script.md](demo-script.md)
 
+## Demo
+
+The current demo plan is in [demo-script.md](demo-script.md). The public
+LinkedIn video URL is an external publication dependency and will be added in
+the release verification step after the video is published. Selected screen
+captures are produced during the final demo recording pass; they are not yet
+evidence in this report.
+
 ## Demo image attribution
 
-"Lavender plants growing in a garden" by Brooke Balentine, used under the
-Unsplash License:
+Licensed demo image: "Lavender plants growing in a garden" by Brooke
+Balentine. Available under the Unsplash License:
 <https://unsplash.com/photos/lavender-plants-growing-in-a-garden-o-8pxOIAJcg>

@@ -18,7 +18,7 @@
 - [ ] verify Field Notes signed-out
 - [ ] publish LinkedIn post
 - [ ] verify LinkedIn post, Space, Field Notes, source, and profile links
-- [ ] submit the Space and LinkedIn post URLs before June 15, 2026
+- [ ] submit the Space, LinkedIn post, and Field Notes URLs by the June 15, 2026 deadline
 
 ## Optional
 
