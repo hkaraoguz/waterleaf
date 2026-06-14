@@ -254,6 +254,8 @@ available at `scripts/smoke_modal.py`.
 - Public pages use opaque slugs but are intentionally public for calendar use.
 - Plant identification and watering dates are suggestions, not horticultural
   guarantees.
+- If the weather API is unavailable, Waterleaf still generates dates from the
+  care baseline and labels them as seasonal estimates.
 - Dates after the 16-day forecast are labeled seasonal estimates.
 - ICS `ATTACH` support varies by calendar client; every event also includes a
   portable public profile link.
