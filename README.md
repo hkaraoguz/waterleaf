@@ -67,9 +67,13 @@ deterministic lavender demo identifier. Local persistence uses the
 Run checks:
 
 ```bash
-uv run pytest
+uv sync --group demo
+uv run --group demo pytest
 uv run ruff check .
 ```
+
+The `demo` group installs bundled FFmpeg support for the submission-media
+integration tests, which import `imageio-ffmpeg`.
 
 ## Modal Deployment
 
@@ -264,14 +268,15 @@ available at `scripts/smoke_modal.py`.
 
 ## Submission Materials
 
-- [Field Notes draft](docs/field-notes.md)
-- [Demo script](docs/demo-script.md)
-- [Social post draft](docs/social-post.md)
-- [Submission checklist](docs/submission-checklist.md)
+- [Field Notes](docs/field-notes.md)
+- [30-second demo script](docs/demo-script.md)
+- [LinkedIn post](docs/social-post.md)
+- Submission evidence: `docs/submission-evidence.md` (created in Task 4)
+- [Checklist](docs/submission-checklist.md)
 
 Target quests: Backyard AI, Llama Champion, Modal-powered, and Field Notes.
-Waterleaf does not claim Off the Grid because inference and weather data are
-cloud-hosted.
+Waterleaf does not claim Off the Grid because inference, taxonomy, and weather
+are cloud-hosted.
 
 ## Credits
 
