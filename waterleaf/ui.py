@@ -203,8 +203,8 @@ def build_ui(
             plan=plan,
             edited_events=events,
         )
+        gr.Info(f"Saved {saved.nickname}.")
         return (
-            f"Saved **{saved.nickname}**.",
             _garden_html(application, owner),
             _plant_delete_choices(application, owner),
         )
@@ -366,7 +366,6 @@ def build_ui(
                     wrap=True,
                 )
                 save_button = gr.Button("Save plant", variant="primary")
-                save_status = gr.Markdown(elem_classes="wl-status")
 
         demo.load(
             load_dashboard,
@@ -421,7 +420,7 @@ def build_ui(
                 plan_state,
                 schedule,
             ],
-            outputs=[save_status, garden, delete_choice],
+            outputs=[garden, delete_choice],
             api_visibility="private",
         )
         export_button.click(

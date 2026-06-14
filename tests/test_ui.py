@@ -94,6 +94,10 @@ def test_ui_handlers_are_not_exposed_as_public_api(tmp_path):
 
     assert dependencies
     assert all(item["api_visibility"] != "public" for item in dependencies)
+    save_dependency = next(
+        item for item in dependencies if item["api_name"] == "save"
+    )
+    assert len(save_dependency["outputs"]) == 2
 
 
 def test_optional_watering_interval_accepts_blank_or_one_to_thirty_days():
