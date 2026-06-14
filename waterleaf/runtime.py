@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from waterleaf.application import WaterleafApplication
+from waterleaf.services.care import LocalCareCatalog
 from waterleaf.services.demo import DemoTaxonomy, build_demo_identification
 from waterleaf.services.gbif import GbifClient
 from waterleaf.services.identification import IdentificationService
 from waterleaf.services.llama_cpp import LlamaCppClient
 from waterleaf.services.open_meteo import OpenMeteoClient
-from waterleaf.services.perenual import PerenualClient
 from waterleaf.settings import Settings
 from waterleaf.storage import GardenStore
 
@@ -34,12 +34,8 @@ def build_application(settings: Settings | None = None) -> WaterleafApplication:
         media_directory=settings.media_directory,
         export_directory=settings.export_directory,
         public_base_url=settings.public_base_url,
-        care=PerenualClient(
-            api_key=settings.perenual_api_key,
-            cache_path=settings.care_cache_path,
-        ),
+        care=LocalCareCatalog(),
         weather=OpenMeteoClient(),
         identification=identification,
         taxonomy=taxonomy,
     )
-

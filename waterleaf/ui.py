@@ -161,13 +161,21 @@ def build_ui(
             interval_days = _parse_optional_interval(manual_interval)
         except ValueError as exc:
             raise gr.Error(str(exc)) from exc
-        plan = application.preview_schedule(
-            candidate=candidate,
-            location_query=location_query,
-            is_container=planting == "Container",
-            size_label=size_label.casefold(),
-            manual_interval_days=interval_days,
-        )
+        try:
+            plan = application.preview_schedule(
+                candidate=candidate,
+                location_query=location_query,
+                is_container=planting == "Container",
+                size_label=size_label.casefold(),
+                manual_interval_days=interval_days,
+            )
+        except ValueError as exc:
+            if str(exc) == "A watering interval is required":
+                raise gr.Error(
+                    "No local care baseline is available for this species. "
+                    "Enter a watering interval in days."
+                ) from exc
+            raise
         rows = [
             [item.date.isoformat(), item.reason, item.confidence]
             for item in plan.events
@@ -349,10 +357,10 @@ def build_ui(
                         value="Medium",
                     )
                     manual_interval = gr.Textbox(
-                        label="Custom watering interval (optional)",
+                        label="Watering interval in days",
                         info=(
-                            "Leave blank to use plant care data. A value here replaces "
-                            "that base interval; weather can still shift dates."
+                            "Leave blank when a local baseline is available. Otherwise "
+                            "enter 1-30 days. Weather can still shift dates."
                         ),
                         placeholder="Example: 7",
                         value="",

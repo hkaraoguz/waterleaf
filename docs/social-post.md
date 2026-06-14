@@ -7,7 +7,7 @@ weather-aware 30-day watering calendar. Each event links back to the plant
 photo, so the reminder still makes sense weeks later.
 
 Stack: Gradio + FastAPI on Hugging Face Spaces, Gemma 4 26B-A4B in GGUF through
-llama.cpp on Modal, GBIF, Perenual, and Open-Meteo.
+llama.cpp on Modal, GBIF, a local care catalog, and Open-Meteo.
 
 Tracks: Backyard AI, Llama Champion, Modal-powered, and Field Notes.
 

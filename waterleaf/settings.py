@@ -9,7 +9,6 @@ from pathlib import Path
 class Settings:
     data_directory: Path
     public_base_url: str
-    perenual_api_key: str | None
     modal_endpoint: str | None
     modal_key: str | None
     modal_secret: str | None
@@ -26,10 +25,6 @@ class Settings:
     def export_directory(self) -> Path:
         return self.data_directory / "exports"
 
-    @property
-    def care_cache_path(self) -> Path:
-        return self.data_directory / "cache" / "perenual.json"
-
     @classmethod
     def from_env(cls) -> Settings:
         data_directory = Path(os.getenv("WATERLEAF_DATA_DIR", "data"))
@@ -42,7 +37,6 @@ class Settings:
         return cls(
             data_directory=data_directory,
             public_base_url=public_base_url.rstrip("/"),
-            perenual_api_key=os.getenv("PERENUAL_API_KEY"),
             modal_endpoint=os.getenv("MODAL_ENDPOINT"),
             modal_key=os.getenv("MODAL_KEY"),
             modal_secret=os.getenv("MODAL_SECRET"),
