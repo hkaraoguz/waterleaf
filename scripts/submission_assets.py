@@ -12,7 +12,6 @@ WIDTH = 1920
 HEIGHT = 1080
 
 END_CARD_LEAF_MARK_ORIGIN = (156, 170)
-END_CARD_LEAF_MARK_BOX = (156, 222, 371, 340)
 END_CARD_TITLE_BOX = (418, 232, 736, 352)
 
 VOICEOVER = (
@@ -109,23 +108,24 @@ def generate_voiceover(
             client.close()
 
 
-def _font_candidates() -> list[Path]:
-    return [
-        Path("/Library/Fonts/Arial.ttf"),
+def _font_candidates(bold: bool = False) -> list[Path]:
+    regular_candidates = [
         Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+        Path("C:/Windows/Fonts/arial.ttf"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    ]
+    bold_candidates = [
+        Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+        Path("C:/Windows/Fonts/arialbd.ttf"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
     ]
+    return bold_candidates if bold else regular_candidates
 
 
 def _load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    candidates = _font_candidates()
-    if bold:
-        candidates = [path for path in candidates if "Bold" in path.name] + [
-            path for path in candidates if "Bold" not in path.name
-        ]
+    candidates = _font_candidates(bold=bold)
     for candidate in candidates:
-        if candidate.exists():
+        if candidate.is_file():
             try:
                 return ImageFont.truetype(candidate, size=size)
             except OSError:
@@ -141,12 +141,12 @@ def _measure_text(
     text: str,
     font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
     spacing: int = 10,
-) -> tuple[int, int]:
+) -> tuple[int, int, int, int]:
     if "\n" in text:
         bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=spacing, align="center")
     else:
         bbox = draw.textbbox((0, 0), text, font=font)
-    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+    return bbox
 
 
 def _fit_font(
@@ -161,7 +161,9 @@ def _fit_font(
 ) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for size in range(start_size, min_size - 1, -2):
         font = _load_font(size, bold=bold)
-        width, height = _measure_text(draw, text, font, spacing=spacing)
+        bbox = _measure_text(draw, text, font, spacing=spacing)
+        width = bbox[2] - bbox[0]
+        height = bbox[3] - bbox[1]
         if width <= max_width and height <= max_height:
             return font
     return _load_font(min_size, bold=bold)
@@ -189,9 +191,15 @@ def _draw_fitted_text(
         bold=bold,
         spacing=spacing,
     )
-    width, height = _measure_text(draw, text, font, spacing=spacing)
-    x = left + (right - left - width) / 2 if center else left
-    y = top + (bottom - top - height) / 2
+    bbox = _measure_text(draw, text, font, spacing=spacing)
+    width = bbox[2] - bbox[0]
+    height = bbox[3] - bbox[1]
+    x = (
+        left + (right - left - width) / 2 - bbox[0]
+        if center
+        else left - bbox[0]
+    )
+    y = top + (bottom - top - height) / 2 - bbox[1]
     if "\n" in text:
         draw.multiline_text(
             (x, y),
@@ -203,6 +211,19 @@ def _draw_fitted_text(
         )
     else:
         draw.text((x, y), text, font=font, fill=fill)
+
+
+def _leaf_mark_bounds(origin: tuple[int, int]) -> tuple[int, int, int, int]:
+    x, y = origin
+    left = x
+    top = y + 52
+    right = x + 120 + int(140 * 0.68)
+    bottom = y + 170
+    return left, top, right, bottom
+
+
+END_CARD_LEAF_MARK_BOUNDS = _leaf_mark_bounds(END_CARD_LEAF_MARK_ORIGIN)
+END_CARD_LEAF_MARK_BOX = END_CARD_LEAF_MARK_BOUNDS
 
 
 def _create_canvas() -> Image.Image:
@@ -476,14 +497,15 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--voice", action="store_true")
     args = parser.parse_args(argv)
 
+    if args.voice and not os.getenv("OPENAI_API_KEY"):
+        parser.error("--voice requires OPENAI_API_KEY")
+
     outputs = write_static_assets(args.out)
     for name, path in outputs.items():
         print(f"{name}: {path}")
 
     if args.voice:
         api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            parser.error("--voice requires OPENAI_API_KEY")
         voice_path = generate_voiceover(args.out / "waterleaf-voiceover.mp3", api_key)
         print(f"voice: {voice_path}")
 

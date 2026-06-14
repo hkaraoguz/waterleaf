@@ -4,12 +4,13 @@ from PIL import Image, ImageDraw
 
 from scripts.submission_assets import (
     CAPTION_CUES,
-    END_CARD_LEAF_MARK_BOX,
+    END_CARD_LEAF_MARK_BOUNDS,
     END_CARD_LEAF_MARK_ORIGIN,
     END_CARD_LINES,
     END_CARD_TITLE_BOX,
     VOICEOVER,
     CaptionCue,
+    _draw_fitted_text,
     _load_font,
     generate_voiceover,
     main,
@@ -205,7 +206,7 @@ def test_generate_voiceover_uses_owned_and_injected_clients(monkeypatch, tmp_pat
 
 
 def test_font_fallback_scales_when_no_candidates(monkeypatch):
-    monkeypatch.setattr("scripts.submission_assets._font_candidates", lambda: [])
+    monkeypatch.setattr("scripts.submission_assets._font_candidates", lambda bold=False: [])
 
     canvas = Image.new("RGB", (400, 200), "white")
     draw = ImageDraw.Draw(canvas)
@@ -219,8 +220,56 @@ def test_font_fallback_scales_when_no_candidates(monkeypatch):
     assert (large_bbox[2] - large_bbox[0]) > (small_bbox[2] - small_bbox[0]) * 1.5
 
 
+def test_load_font_prefers_bold_candidates_for_bold_text(monkeypatch):
+    monkeypatch.setattr("scripts.submission_assets.Path.is_file", lambda self: True)
+
+    seen = []
+
+    def fake_truetype(path, size):
+        seen.append((Path(path), size))
+        return object()
+
+    monkeypatch.setattr("scripts.submission_assets.ImageFont.truetype", fake_truetype)
+
+    _load_font(28, bold=False)
+    _load_font(28, bold=True)
+
+    assert seen[0][0] == Path("/System/Library/Fonts/Supplemental/Arial.ttf")
+    assert seen[1][0] == Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
+
+
+def test_draw_fitted_text_centers_visible_bounds_with_bbox_offsets(monkeypatch):
+    monkeypatch.setattr("scripts.submission_assets._fit_font", lambda *args, **kwargs: object())
+
+    canvas = Image.new("RGB", (400, 200), "white")
+    draw = ImageDraw.Draw(canvas)
+    placed = []
+
+    monkeypatch.setattr(
+        ImageDraw.ImageDraw,
+        "textbbox",
+        lambda self, xy, text, font=None, anchor=None, spacing=4, align="left": (10, 20, 110, 60),
+    )
+
+    def fake_text(self, xy, text, font=None, fill=None):
+        placed.append(xy)
+
+    monkeypatch.setattr(ImageDraw.ImageDraw, "text", fake_text)
+
+    _draw_fitted_text(
+        draw,
+        (0, 0, 200, 100),
+        "Waterleaf",
+        fill="black",
+        start_size=48,
+        center=True,
+    )
+
+    assert placed == [(40.0, 10.0)]
+
+
 def test_font_fallback_and_static_asset_rendering_without_candidates(monkeypatch, tmp_path):
-    monkeypatch.setattr("scripts.submission_assets._font_candidates", lambda: [])
+    monkeypatch.setattr("scripts.submission_assets._font_candidates", lambda bold=False: [])
 
     end_card = render_end_card()
     thumbnail = render_thumbnail()
@@ -247,7 +296,7 @@ def test_font_fallback_and_static_asset_rendering_without_candidates(monkeypatch
 
 
 def test_end_card_mark_and_title_boxes_do_not_overlap():
-    leaf_left, _, leaf_right, leaf_bottom = END_CARD_LEAF_MARK_BOX
+    leaf_left, leaf_top, leaf_right, leaf_bottom = END_CARD_LEAF_MARK_BOUNDS
     title_left, title_top, title_right, title_bottom = END_CARD_TITLE_BOX
 
     horizontal_gap = title_left - leaf_right
@@ -256,11 +305,12 @@ def test_end_card_mark_and_title_boxes_do_not_overlap():
     assert title_left >= 410
     assert END_CARD_LEAF_MARK_ORIGIN == (156, 170)
     assert leaf_left == 156
+    assert leaf_top == 222
     assert not (
         leaf_right > title_left
         and leaf_left < title_right
         and leaf_bottom > title_top
-        and END_CARD_LEAF_MARK_BOX[1] < title_bottom
+        and leaf_top < title_bottom
     )
 
 
@@ -309,23 +359,20 @@ def test_cli_writes_safe_static_output_and_voiceover(monkeypatch, tmp_path, caps
     }
 
 
-def test_cli_requires_key_for_voice(monkeypatch, tmp_path):
+def test_cli_requires_key_for_voice(monkeypatch, tmp_path, capsys):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     called = {"generate": False}
+    written = {"static": False}
 
     def fake_generate_voiceover(*args, **kwargs):
         called["generate"] = True
         raise AssertionError("generate_voiceover should not be called without a key")
 
-    monkeypatch.setattr(
-        "scripts.submission_assets.write_static_assets",
-        lambda output_directory: {
-            "script": Path(output_directory) / "waterleaf-voiceover.txt",
-            "captions": Path(output_directory) / "waterleaf-demo.srt",
-            "end_card": Path(output_directory) / "waterleaf-end-card.png",
-            "thumbnail": Path(output_directory) / "waterleaf-thumbnail.png",
-        },
-    )
+    def fake_write_static_assets(*args, **kwargs):
+        written["static"] = True
+        raise AssertionError("write_static_assets should not be called without a key")
+
+    monkeypatch.setattr("scripts.submission_assets.write_static_assets", fake_write_static_assets)
     monkeypatch.setattr("scripts.submission_assets.generate_voiceover", fake_generate_voiceover)
 
     try:
@@ -335,6 +382,8 @@ def test_cli_requires_key_for_voice(monkeypatch, tmp_path):
     else:
         raise AssertionError("main() did not exit when OPENAI_API_KEY was missing")
     assert called["generate"] is False
+    assert written["static"] is False
+    assert capsys.readouterr().out == ""
 
 
 def test_cli_defaults_to_artifacts_submission_and_prints_safe_paths(monkeypatch, capsys):
