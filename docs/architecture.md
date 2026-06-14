@@ -9,7 +9,7 @@ flowchart LR
     A --> M[Modal proxy-auth endpoint]
     M --> L[llama.cpp\nGemma 4 26B-A4B GGUF]
     A --> B[GBIF taxonomy]
-    A --> P[Perenual care data]
+    A --> P[Local care baseline catalog]
     A --> W[Open-Meteo]
     A --> I[Whole-garden ICS]
     I --> C[Apple / Google / Outlook]
@@ -24,7 +24,8 @@ flowchart LR
 
 ## Scheduling
 
-Perenual provides a baseline interval. Waterleaf shortens the interval for
+The local catalog provides a baseline interval for supported species; users
+enter one explicitly for other plants. Waterleaf shortens the interval for
 containers, applies bounded rain and heat adjustments to the 16-day forecast,
 and labels later dates as seasonal estimates. The language model never chooses
 watering dates.
@@ -34,4 +35,3 @@ watering dates.
 HF username is the private ownership key. Coordinates are rounded before
 storage. Public plant profiles use opaque slugs and omit account and location
 data. Uploaded images are resized, converted to JPEG, and stripped of EXIF.
-

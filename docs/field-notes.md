@@ -28,10 +28,10 @@ The Hugging Face Space remains a small CPU application.
 ## Scheduling without pretending
 
 Watering depends on species, planting context, rain, temperature, and drying
-conditions. Waterleaf combines a care-data interval with Open-Meteo data.
-Forecast dates are adjusted with deterministic rules and shown before export.
-Dates beyond the reliable forecast window are visibly marked as seasonal
-estimates. Users can edit or remove every event.
+conditions. Waterleaf combines a local care baseline or user-entered interval
+with Open-Meteo data. Forecast dates are adjusted with deterministic rules and
+shown before export. Dates beyond the reliable forecast window are visibly
+marked as seasonal estimates. Users can edit or remove every event.
 
 ## Calendar portability
 

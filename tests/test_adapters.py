@@ -5,10 +5,10 @@ import httpx
 from PIL import Image
 
 from waterleaf.models import TaxonCandidate, VisualAnalysis
+from waterleaf.services.care import LocalCareCatalog
 from waterleaf.services.gbif import GbifClient
 from waterleaf.services.llama_cpp import VISUAL_SCHEMA, LlamaCppClient
 from waterleaf.services.open_meteo import OpenMeteoClient
-from waterleaf.services.perenual import PerenualClient
 
 
 def test_gbif_suggest_returns_only_plant_species():
@@ -144,58 +144,30 @@ def test_gbif_scientific_search_prefers_accepted_record_with_common_name():
     assert matches[0].common_name == "English lavender"
 
 
-def test_perenual_fetches_details_once_then_uses_cache(tmp_path):
-    calls = []
+def test_local_care_catalog_matches_species_with_author_suffix():
+    profile = LocalCareCatalog().get_care("Lavandula angustifolia Mill.")
 
-    def handler(request: httpx.Request) -> httpx.Response:
-        calls.append(str(request.url))
-        if "species-list" in request.url.path:
-            return httpx.Response(200, json={"data": [{"id": 77}]})
-        return httpx.Response(
-            200,
-            json={
-                "id": 77,
-                "common_name": "English lavender",
-                "scientific_name": ["Lavandula angustifolia"],
-                "watering": "Minimum",
-                "watering_general_benchmark": {"value": "7-10", "unit": "days"},
-                "sunlight": ["full sun"],
-            },
-        )
-
-    client = PerenualClient(
-        api_key="test-key",
-        cache_path=tmp_path / "care-cache.json",
-        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
-    )
-
-    first = client.get_care("Lavandula angustifolia")
-    second = client.get_care("Lavandula angustifolia")
-
-    assert first == second
-    assert first.min_days == 7
-    assert first.max_days == 10
-    assert first.sunlight == ["full sun"]
-    assert len(calls) == 2
-
-
-def test_perenual_falls_back_when_details_require_paid_plan(tmp_path):
-    def handler(request: httpx.Request) -> httpx.Response:
-        if "species-list" in request.url.path:
-            return httpx.Response(200, json={"data": [{"id": 77}]})
-        return httpx.Response(429, text="Please Upgrade Plan")
-
-    client = PerenualClient(
-        api_key="free-plan-key",
-        cache_path=tmp_path / "care-cache.json",
-        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
-    )
-
-    profile = client.get_care("Lavandula angustifolia")
-
+    assert profile.scientific_name == "Lavandula angustifolia Mill."
     assert profile.common_name == "English lavender"
     assert profile.min_days == 7
     assert profile.max_days == 10
+    assert profile.sunlight == ["full sun"]
+
+
+def test_local_care_catalog_uses_lavender_genus_baseline():
+    profile = LocalCareCatalog().get_care("Lavandula latifolia Medik.")
+
+    assert profile.common_name == "Lavender"
+    assert profile.min_days == 7
+    assert profile.max_days == 10
+
+
+def test_local_care_catalog_requires_manual_interval_for_unknown_species():
+    profile = LocalCareCatalog().get_care("Tulipa gesneriana")
+
+    assert profile.common_name == "Tulipa gesneriana"
+    assert profile.min_days is None
+    assert profile.max_days is None
 
 
 def test_open_meteo_geocodes_and_parses_forecast():

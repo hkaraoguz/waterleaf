@@ -61,8 +61,8 @@ def test_ui_contains_dashboard_capture_confirmation_and_export(tmp_path):
     assert "Plant nickname (required)" in config
     assert "City (required)" in config
     assert "Watering time (required)" in config
-    assert "Custom watering interval (optional)" in config
-    assert "Leave blank to use plant care data" in config
+    assert "Watering interval in days" in config
+    assert "Leave blank when a local baseline is available" in config
     assert "Example: 7" in config
     assert "Garden location" not in config
     assert "Interval override" not in config

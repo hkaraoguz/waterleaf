@@ -17,7 +17,6 @@ def test_runtime_uses_demo_identification_without_modal_endpoint(tmp_path):
     settings = Settings(
         data_directory=tmp_path,
         public_base_url="http://localhost:7860",
-        perenual_api_key=None,
         modal_endpoint=None,
         modal_key=None,
         modal_secret=None,

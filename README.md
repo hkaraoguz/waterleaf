@@ -43,7 +43,7 @@ Hackathon.
 - **Vision model:** `ggml-org/gemma-4-26B-A4B-it-GGUF`
 - **Runtime:** llama.cpp `server-cuda13-b9445` on a Modal L4
 - **Taxonomy:** GBIF Species API
-- **Care data:** Perenual, with persistent caching and manual interval fallback
+- **Care data:** Small local baseline catalog with manual interval fallback
 - **Weather:** Open-Meteo geocoding and 16-day forecast
 - **Calendar:** RFC 5545-compatible ICS with stable UIDs, alarms, profile URLs,
   and image attachments
@@ -202,7 +202,6 @@ In **Space Settings → Variables and secrets**, add:
 | `MODAL_ENDPOINT` | Secret | Production | Protected llama.cpp base URL |
 | `MODAL_KEY` | Secret | Production | Modal proxy token ID |
 | `MODAL_SECRET` | Secret | Production | Modal proxy token secret |
-| `PERENUAL_API_KEY` | Secret | Optional | Plant care benchmark lookup |
 | `PUBLIC_BASE_URL` | Variable | Optional | Override the derived Space URL |
 | `WATERLEAF_DATA_DIR` | Variable | No | Defaults to `/data` in Docker |
 
@@ -258,8 +257,8 @@ available at `scripts/smoke_modal.py`.
 - Dates after the 16-day forecast are labeled seasonal estimates.
 - ICS `ATTACH` support varies by calendar client; every event also includes a
   portable public profile link.
-- Perenual can be omitted; users must provide a manual interval when no care
-  benchmark is available.
+- Users must provide a manual interval when the local catalog has no care
+  baseline for the selected species.
 
 ## Submission Materials
 
@@ -277,5 +276,4 @@ cloud-hosted.
 - [Gemma 4](https://huggingface.co/google/gemma-4-26B-A4B-it)
 - [llama.cpp](https://github.com/ggml-org/llama.cpp)
 - [GBIF](https://www.gbif.org/developer/species)
-- [Perenual](https://perenual.com/docs/api)
 - [Open-Meteo](https://open-meteo.com/)
