@@ -11,14 +11,14 @@
 - [ ] licensed image/attribution
 - [x] run complete tests/Ruff (72 tests, current fact)
 - [ ] capture live end-to-end
-- [ ] generate AI narration/captions/card/thumbnail (tooling exists but final artifacts not generated in repo; leave unchecked)
+- [ ] generate AI narration/captions/card/thumbnail
 - [ ] assemble/validate MP4
 - [ ] watch muted/audio desktop/mobile
 - [ ] upload final repository to Space
 - [ ] verify Field Notes signed-out
-- [ ] publish LinkedIn
-- [ ] verify links
-- [ ] submit before June 15
+- [ ] publish LinkedIn post
+- [ ] verify LinkedIn post, Space, Field Notes, source, and profile links
+- [ ] submit the Space and LinkedIn post URLs before June 15, 2026
 
 ## Optional
 
@@ -35,4 +35,4 @@
 - Claim: Modal-powered
 - Claim: Field Notes
 - No Off the Grid claim
-- No metrics or validation claims without evidence
+- Do not claim measured accuracy, measured latency, or user validation unless corresponding evidence is completed and published.

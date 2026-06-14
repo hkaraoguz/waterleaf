@@ -9,6 +9,9 @@
 - Burned captions plus `artifacts/submission/waterleaf-demo.srt`
 - AI narration disclosure on the end card and in the post copy
 
+Record clean clips without notifications, browser chrome changes, or visible secrets. Each source clip may be longer than its final duration because the composition script trims it.
+Keep secrets and account menus out of frame.
+
 ## Raw Clips
 
 1. `artifacts/submission/raw/01-hook.mp4` - 4 sec

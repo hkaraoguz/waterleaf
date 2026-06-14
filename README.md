@@ -271,8 +271,8 @@ available at `scripts/smoke_modal.py`.
 - [Field Notes](docs/field-notes.md)
 - [30-second demo script](docs/demo-script.md)
 - [LinkedIn post](docs/social-post.md)
-- Submission evidence: `docs/submission-evidence.md` (created in Task 4)
-- [Checklist](docs/submission-checklist.md)
+- [Submission evidence](docs/submission-evidence.md)
+- [Submission checklist](docs/submission-checklist.md)
 
 Target quests: Backyard AI, Llama Champion, Modal-powered, and Field Notes.
 Waterleaf does not claim Off the Grid because inference, taxonomy, and weather
