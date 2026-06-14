@@ -155,17 +155,26 @@ hackathon namespace.
 
 The root README metadata already enables Docker on port `7860` and HF OAuth.
 
-### 2. Push this repository
+### 2. Upload this repository
 
-Add the Space as a Git remote and push the feature branch:
+Authenticate the Hugging Face CLI and upload the working tree. The CLI sends
+binary assets through Xet storage, which a plain Git push does not:
 
 ```bash
-git remote add hf https://huggingface.co/spaces/build-small-hackathon/waterleaf
-git push hf feat/waterleaf:main
+hf auth login
+hf upload build-small-hackathon/waterleaf . . \
+  --repo-type space \
+  --exclude '.git/**' \
+  --exclude '.venv/**' \
+  --exclude '.pytest_cache/**' \
+  --exclude '.ruff_cache/**' \
+  --exclude '**/__pycache__/**' \
+  --exclude '*.pyc' \
+  --exclude 'data/**' \
+  --exclude '.env'
 ```
 
-Use an HF user access token as the Git password when prompted. Do not commit
-that token or any deployment secret.
+Do not commit or upload local environment files or deployment secrets.
 
 ### 3. Attach persistent storage
 
