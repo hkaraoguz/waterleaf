@@ -7,7 +7,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     WATERLEAF_DATA_DIR=/data
 
 RUN pip install --no-cache-dir uv==0.11.8 \
-    && useradd --create-home --uid 1000 user
+    && useradd --create-home --uid 1000 user \
+    && mkdir -p /data \
+    && chown user:user /data
 
 WORKDIR /app
 COPY --chown=user:user pyproject.toml uv.lock README.md ./
@@ -25,4 +27,3 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7860/health', timeout=3)"
 
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
-
