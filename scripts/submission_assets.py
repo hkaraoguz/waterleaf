@@ -11,6 +11,10 @@ from PIL import Image, ImageDraw, ImageFont
 WIDTH = 1920
 HEIGHT = 1080
 
+END_CARD_LEAF_MARK_ORIGIN = (156, 170)
+END_CARD_LEAF_MARK_BOX = (156, 222, 371, 340)
+END_CARD_TITLE_BOX = (418, 232, 736, 352)
+
 VOICEOVER = (
     "A garden photo should become something useful. Waterleaf uses Gemma 4 through llama.cpp "
     "to read visible traits, then grounds its suggestions in GBIF records so you make the final "
@@ -264,11 +268,11 @@ def render_end_card() -> Image.Image:
         outline="#b8c9ae",
         width=3,
     )
-    _draw_leaf_mark(draw, (156, 188))
+    _draw_leaf_mark(draw, END_CARD_LEAF_MARK_ORIGIN)
 
     _draw_fitted_text(
         draw,
-        (360, 232, 736, 352),
+        END_CARD_TITLE_BOX,
         "Waterleaf",
         fill="#f6f0e4",
         start_size=80,

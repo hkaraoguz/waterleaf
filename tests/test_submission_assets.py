@@ -4,7 +4,10 @@ from PIL import Image, ImageDraw
 
 from scripts.submission_assets import (
     CAPTION_CUES,
+    END_CARD_LEAF_MARK_BOX,
+    END_CARD_LEAF_MARK_ORIGIN,
     END_CARD_LINES,
+    END_CARD_TITLE_BOX,
     VOICEOVER,
     CaptionCue,
     _load_font,
@@ -241,6 +244,24 @@ def test_font_fallback_and_static_asset_rendering_without_candidates(monkeypatch
         with Image.open(outputs[key]) as image:
             assert image.size == (1920, 1080)
             assert image.mode == "RGB"
+
+
+def test_end_card_mark_and_title_boxes_do_not_overlap():
+    leaf_left, _, leaf_right, leaf_bottom = END_CARD_LEAF_MARK_BOX
+    title_left, title_top, title_right, title_bottom = END_CARD_TITLE_BOX
+
+    horizontal_gap = title_left - leaf_right
+
+    assert horizontal_gap >= 24
+    assert title_left >= 410
+    assert END_CARD_LEAF_MARK_ORIGIN == (156, 170)
+    assert leaf_left == 156
+    assert not (
+        leaf_right > title_left
+        and leaf_left < title_right
+        and leaf_bottom > title_top
+        and END_CARD_LEAF_MARK_BOX[1] < title_bottom
+    )
 
 
 def test_cli_writes_safe_static_output_and_voiceover(monkeypatch, tmp_path, capsys):
