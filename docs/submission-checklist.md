@@ -35,4 +35,5 @@
 - Claim: Modal-powered
 - Claim: Field Notes
 - No Off the Grid claim
-- Do not claim measured accuracy, measured latency, or user validation unless corresponding evidence is completed and published.
+- Do not claim measured accuracy, measured latency, or user validation unless
+  corresponding evidence is completed and published.

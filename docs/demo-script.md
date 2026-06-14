@@ -39,12 +39,14 @@ Keep secrets and account menus out of frame.
 - `4-11`
   - Visual: upload the licensed image, show visible traits, then the three
     GBIF-backed matches.
-  - Voice: `Waterleaf uses Gemma 4 through llama.cpp to read visible traits, then grounds its suggestions in GBIF records...`
+  - Voice: `Waterleaf uses Gemma 4 through llama.cpp to read visible traits,
+    then grounds its suggestions in GBIF records...`
 - `11-19`
   - Visual: confirm English lavender and reveal editable dates with reason and
     confidence.
   - Caption: `The model suggests. You confirm.`
-  - Voice: `...so you make the final call. It combines local care baselines with weather rules to create an editable thirty-day plan.`
+  - Voice: `...so you make the final call. It combines local care baselines
+    with weather rules to create an editable thirty-day plan.`
 - `19-26`
   - Visual: save the plant, export the ICS, show the calendar event, then open
     the public plant profile.
