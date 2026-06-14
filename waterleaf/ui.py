@@ -19,6 +19,7 @@ from waterleaf.models import (
 )
 from waterleaf.rate_limit import SlidingWindowRateLimiter
 from waterleaf.services.demo import DemoTaxonomy, build_demo_identification
+from waterleaf.space import has_hf_oauth, is_hf_space
 
 CSS = """
 :root {
@@ -83,13 +84,14 @@ def build_ui(
 ) -> gr.Blocks:
     identification = identification or application.identification or build_demo_identification()
     taxonomy = taxonomy or application.taxonomy or DemoTaxonomy()
-    oauth_enabled = bool(os.getenv("SPACE_ID") or os.getenv("OAUTH_CLIENT_ID"))
+    space_environment = is_hf_space()
+    oauth_enabled = has_hf_oauth()
     guest_limiter = SlidingWindowRateLimiter(limit=3, window_seconds=3600)
 
     def owner_from_profile(profile: gr.OAuthProfile | None) -> str | None:
         if profile is not None:
             return profile.username
-        if not oauth_enabled:
+        if not space_environment:
             return os.getenv("WATERLEAF_LOCAL_USER", "local-gardener")
         return None
 
