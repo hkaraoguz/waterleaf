@@ -355,7 +355,7 @@ def test_validation_accepts_approved_ranges_and_rejects_invalid_media():
     validate_demo(MediaProbe(30.0, has_h264=True, has_aac=True))
     validate_voiceover(MediaProbe(28.0, has_h264=False, has_aac=False))
 
-    with pytest.raises(ValueError, match="29.5-30.2"):
+    with pytest.raises(ValueError, match="29.5-30.0"):
         validate_demo(MediaProbe(31.0, has_h264=True, has_aac=True))
     with pytest.raises(ValueError, match="H.264"):
         validate_demo(MediaProbe(30.0, has_h264=False, has_aac=True))
@@ -363,6 +363,11 @@ def test_validation_accepts_approved_ranges_and_rejects_invalid_media():
         validate_demo(MediaProbe(30.0, has_h264=True, has_aac=False))
     with pytest.raises(ValueError, match="24.0-29.5"):
         validate_voiceover(MediaProbe(30.0, has_h264=False, has_aac=False))
+
+
+def test_validation_rejects_demo_over_thirty_seconds():
+    with pytest.raises(ValueError, match="29.5-30.0"):
+        validate_demo(MediaProbe(30.01, has_h264=True, has_aac=True))
 
 
 def test_cli_missing_inputs_reports_every_required_path(

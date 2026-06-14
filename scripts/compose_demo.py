@@ -179,9 +179,9 @@ def validate_voiceover(probe: MediaProbe) -> None:
 
 
 def validate_demo(probe: MediaProbe) -> None:
-    if not 29.5 <= probe.duration_seconds <= 30.2:
+    if not 29.5 <= probe.duration_seconds <= 30.0:
         raise ValueError(
-            "Demo duration must be 29.5-30.2 seconds; "
+            "Demo duration must be 29.5-30.0 seconds; "
             f"got {probe.duration_seconds:.2f}"
         )
     if not probe.has_h264:
