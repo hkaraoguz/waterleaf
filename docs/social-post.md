@@ -11,6 +11,5 @@ llama.cpp on Modal, GBIF, Perenual, and Open-Meteo.
 
 Tracks: Backyard AI, Llama Champion, Modal-powered, and Field Notes.
 
-Space: [ADD SPACE URL]
+Space: https://huggingface.co/spaces/build-small-hackathon/waterleaf
 Field Notes: [ADD ARTICLE URL]
-
