@@ -211,6 +211,17 @@ def test_open_meteo_geocodes_and_parses_forecast():
     assert forecast[1].precipitation_mm == 7.2
 
 
+def test_open_meteo_uses_seasonal_schedule_when_forecast_is_rate_limited():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(429, text="Too Many Requests")
+
+    client = OpenMeteoClient(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler))
+    )
+
+    assert client.forecast(59.33, 18.07) == []
+
+
 def test_llama_cpp_sends_all_images_and_constrained_schema(tmp_path):
     image_paths: list[Path] = []
     for index in range(2):
