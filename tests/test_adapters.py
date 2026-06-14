@@ -179,6 +179,25 @@ def test_perenual_fetches_details_once_then_uses_cache(tmp_path):
     assert len(calls) == 2
 
 
+def test_perenual_falls_back_when_details_require_paid_plan(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        if "species-list" in request.url.path:
+            return httpx.Response(200, json={"data": [{"id": 77}]})
+        return httpx.Response(429, text="Please Upgrade Plan")
+
+    client = PerenualClient(
+        api_key="free-plan-key",
+        cache_path=tmp_path / "care-cache.json",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    profile = client.get_care("Lavandula angustifolia")
+
+    assert profile.common_name == "English lavender"
+    assert profile.min_days == 7
+    assert profile.max_days == 10
+
+
 def test_open_meteo_geocodes_and_parses_forecast():
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.host == "geocoding-api.open-meteo.com":
