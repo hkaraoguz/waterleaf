@@ -1,0 +1,3 @@
+case_id,images,expected_scientific_name,notes
+lavender-01,assets/sample-lavender.png,Lavandula angustifolia,Generated smoke-test image; replace with real labeled garden photographs
+
