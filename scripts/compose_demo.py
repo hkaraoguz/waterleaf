@@ -24,8 +24,28 @@ class MediaProbe:
     has_aac: bool
 
 
-def _escaped_subtitle_path(path: Path) -> str:
-    return str(path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+def _escape_subtitle_filename(path: Path) -> str:
+    escaped = []
+    for character in str(path):
+        if character == "\\":
+            escaped.append("\\\\" * 2)
+        elif character == ":":
+            escaped.append("\\\\" + ":")
+        elif character == "'":
+            escaped.append("\\\\" + "\\'")
+        else:
+            escaped.append(character)
+    return "".join(escaped)
+
+
+def _subtitle_filter(path: Path) -> str:
+    return (
+        "subtitles=filename="
+        f"{_escape_subtitle_filename(path)}:"
+        "force_style='FontName=Arial\\,FontSize=30\\,"
+        "PrimaryColour=&H00FFFFFF\\,OutlineColour=&H00000000\\,"
+        "BorderStyle=1\\,Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'"
+    )
 
 
 def compose_command(
@@ -66,14 +86,7 @@ def compose_command(
         )
 
     filters.append("".join(f"[v{index}]" for index in range(5)) + "concat=n=5:v=1:a=0[base]")
-    filters.append(
-        "[base]"
-        f"subtitles='{_escaped_subtitle_path(assets_directory / 'waterleaf-demo.srt')}':"
-        "force_style='FontName=Arial,FontSize=30,"
-        "PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,"
-        "BorderStyle=1,Outline=3,Shadow=0,MarginV=55,Alignment=2'"
-        "[video]"
-    )
+    filters.append(f"[base]{_subtitle_filter(assets_directory / 'waterleaf-demo.srt')}[video]")
 
     command.extend(
         [

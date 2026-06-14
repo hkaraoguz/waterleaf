@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,7 @@ from scripts.compose_demo import (
     OUTPUT_SECONDS,
     RAW_CLIPS,
     MediaProbe,
+    _subtitle_filter,
     compose_command,
     main,
     parse_probe,
@@ -78,9 +80,9 @@ def test_compose_command_uses_approved_timeline_and_codecs(tmp_path: Path):
         ) in filter_complex
 
     assert "[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0[base]" in filter_complex
-    assert "subtitles='" in filter_complex
-    assert "force_style='FontName=Arial,FontSize=30," in filter_complex
-    assert "Outline=3,Shadow=0,MarginV=55,Alignment=2'" in filter_complex
+    assert "subtitles=filename=" in filter_complex
+    assert "force_style='FontName=Arial\\,FontSize=30\\," in filter_complex
+    assert "Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'" in filter_complex
     assert command[command.index("-map") : command.index("-map") + 4] == [
         "-map",
         "[video]",
@@ -96,20 +98,57 @@ def test_compose_command_uses_approved_timeline_and_codecs(tmp_path: Path):
     assert command[-1] == str(output)
 
 
-def test_compose_command_escapes_subtitle_path_for_libass(tmp_path: Path):
-    assets_directory = tmp_path / "odd'folder:clip\\take"
-    command = compose_command(
-        ffmpeg="/tmp/ffmpeg",
-        raw_directory=tmp_path / "raw",
-        assets_directory=assets_directory,
-        output=tmp_path / "waterleaf-demo.mp4",
+def test_subtitle_filter_escapes_filename_and_style_for_ffmpeg(tmp_path: Path):
+    subtitle_path = tmp_path / "odd'folder:clip\\take" / "waterleaf-demo.srt"
+
+    expected = (
+        "subtitles=filename="
+        f"{tmp_path}/odd\\\\\\'folder\\\\:clip\\\\\\\\take/waterleaf-demo.srt:"
+        "force_style='FontName=Arial\\,FontSize=30\\,"
+        "PrimaryColour=&H00FFFFFF\\,OutlineColour=&H00000000\\,"
+        "BorderStyle=1\\,Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'"
     )
-    filter_complex = _filter_complex(command)
 
-    escaped = str(assets_directory / "waterleaf-demo.srt").replace("\\", "\\\\")
-    escaped = escaped.replace(":", "\\:").replace("'", "\\'")
+    assert _subtitle_filter(subtitle_path) == expected
 
-    assert f"subtitles='{escaped}'" in filter_complex
+
+def test_subtitle_filter_handles_special_characters_with_bundled_ffmpeg(tmp_path: Path):
+    imageio_ffmpeg = pytest.importorskip("imageio_ffmpeg")
+    assets_directory = tmp_path / "odd'folder:clip\\take"
+    try:
+        assets_directory.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        pytest.skip(f"platform cannot create required subtitle path: {exc}")
+
+    subtitle_path = assets_directory / "waterleaf-demo.srt"
+    subtitle_path.write_text(
+        "1\n00:00:00,000 --> 00:00:00,900\nWaterleaf\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "frame.png"
+
+    result = subprocess.run(
+        [
+            imageio_ffmpeg.get_ffmpeg_exe(),
+            "-y",
+            "-hide_banner",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=c=black:s=320x240:d=1",
+            "-vf",
+            _subtitle_filter(subtitle_path),
+            "-frames:v",
+            "1",
+            str(output),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert output.is_file()
 
 
 def test_parse_probe_reads_duration_and_codecs():
