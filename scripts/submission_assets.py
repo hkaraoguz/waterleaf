@@ -67,9 +67,9 @@ def speech_payload() -> dict[str, str]:
         "input": VOICEOVER,
         "response_format": "mp3",
         "instructions": (
-            "calm concise confident product-demo style; target 27 to 29 seconds; "
+            "calm, concise, confident, product-demo style; target 27 to 29 seconds; "
             "natural pace; emphasize `something useful`, `final call`, `thirty-day plan`, "
-            "`links back to the photo`; Do not add or remove words."
+            "and `links back to the photo`; Do not add or remove words."
         ),
     }
 
@@ -129,6 +129,75 @@ def _load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageF
     return ImageFont.load_default()
 
 
+def _measure_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
+    spacing: int = 10,
+) -> tuple[int, int]:
+    if "\n" in text:
+        bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=spacing, align="center")
+    else:
+        bbox = draw.textbbox((0, 0), text, font=font)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def _fit_font(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    max_width: int,
+    max_height: int,
+    start_size: int,
+    min_size: int = 18,
+    bold: bool = False,
+    spacing: int = 10,
+) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    for size in range(start_size, min_size - 1, -2):
+        font = _load_font(size, bold=bold)
+        width, height = _measure_text(draw, text, font, spacing=spacing)
+        if width <= max_width and height <= max_height:
+            return font
+    return _load_font(min_size, bold=bold)
+
+
+def _draw_fitted_text(
+    draw: ImageDraw.ImageDraw,
+    box: tuple[int, int, int, int],
+    text: str,
+    fill: str,
+    start_size: int,
+    min_size: int = 18,
+    bold: bool = False,
+    center: bool = False,
+    spacing: int = 10,
+) -> None:
+    left, top, right, bottom = box
+    font = _fit_font(
+        draw,
+        text,
+        right - left,
+        bottom - top,
+        start_size=start_size,
+        min_size=min_size,
+        bold=bold,
+        spacing=spacing,
+    )
+    width, height = _measure_text(draw, text, font, spacing=spacing)
+    x = left + (right - left - width) / 2 if center else left
+    y = top + (bottom - top - height) / 2
+    if "\n" in text:
+        draw.multiline_text(
+            (x, y),
+            text,
+            font=font,
+            fill=fill,
+            spacing=spacing,
+            align="center" if center else "left",
+        )
+    else:
+        draw.text((x, y), text, font=font, fill=fill)
+
+
 def _create_canvas() -> Image.Image:
     return Image.new("RGB", (WIDTH, HEIGHT), "#173024")
 
@@ -136,32 +205,15 @@ def _create_canvas() -> Image.Image:
 def _draw_background(draw: ImageDraw.ImageDraw) -> None:
     draw.rectangle([0, 0, WIDTH, HEIGHT], fill="#173024")
     draw.rounded_rectangle(
-        [96, 96, WIDTH - 96, HEIGHT - 96],
-        radius=42,
+        [84, 84, WIDTH - 84, HEIGHT - 84],
+        radius=46,
         fill="#f6f0e4",
         outline="#c7b89a",
         width=4,
     )
-    draw.ellipse([-220, -180, 680, 740], fill="#254b36")
-    draw.ellipse([WIDTH - 580, 110, WIDTH + 180, 870], fill="#d7e4cf")
-    draw.ellipse([WIDTH - 430, 760, WIDTH + 110, HEIGHT + 190], fill="#89a97b")
-
-
-def _multiline_center(
-    draw: ImageDraw.ImageDraw,
-    box: tuple[int, int, int, int],
-    text: str,
-    font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
-    fill: str,
-    spacing: int = 12,
-) -> None:
-    left, top, right, bottom = box
-    bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=spacing, align="center")
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-    x = left + (right - left - text_width) / 2
-    y = top + (bottom - top - text_height) / 2
-    draw.multiline_text((x, y), text, font=font, fill=fill, spacing=spacing, align="center")
+    draw.ellipse([-220, -220, 520, 540], fill="#254b36")
+    draw.ellipse([WIDTH - 520, 116, WIDTH + 120, 760], fill="#d7e4cf")
+    draw.ellipse([WIDTH - 290, 826, WIDTH + 120, HEIGHT + 160], fill="#89a97b")
 
 
 def _draw_leaf_mark(draw: ImageDraw.ImageDraw, origin: tuple[int, int]) -> None:
@@ -195,52 +247,106 @@ def render_end_card() -> Image.Image:
     draw = ImageDraw.Draw(image)
     _draw_background(draw)
 
-    title_font = _load_font(68, bold=True)
-    body_font = _load_font(38)
-    url_font = _load_font(30)
-    footer_font = _load_font(24)
-
     draw.rounded_rectangle(
-        [144, 160, 1100, 610],
-        radius=38,
+        [128, 132, 820, 944],
+        radius=36,
         fill="#173024",
         outline="#6da66a",
         width=3,
     )
-    _draw_leaf_mark(draw, (210, 210))
-
-    draw.text((420, 240), "Waterleaf", font=title_font, fill="#f6f0e4")
-    draw.text((420, 336), "Plant care that starts from a photo.", font=body_font, fill="#d7e4cf")
-    draw.text(
-        (420, 414),
-        "Identifies visible traits, grounds suggestions in GBIF, and builds",
-        font=body_font,
-        fill="#d7e4cf",
+    draw.rounded_rectangle(
+        [880, 132, 1792, 944],
+        radius=36,
+        fill="#dbe7d2",
+        outline="#b8c9ae",
+        width=3,
     )
-    draw.text(
-        (420, 464),
-        "an editable 30-day plan you can export and use immediately.",
-        font=body_font,
+    _draw_leaf_mark(draw, (182, 196))
+
+    _draw_fitted_text(
+        draw,
+        (206, 236, 736, 350),
+        "Waterleaf",
+        fill="#f6f0e4",
+        start_size=80,
+        min_size=58,
+        bold=True,
+    )
+    _draw_fitted_text(
+        draw,
+        (206, 350, 734, 414),
+        "Photo to plant care",
         fill="#d7e4cf",
+        start_size=42,
+        min_size=28,
+    )
+    _draw_fitted_text(
+        draw,
+        (206, 450, 722, 514),
+        "Visible traits, GBIF context,",
+        fill="#d7e4cf",
+        start_size=32,
+        min_size=24,
+    )
+    _draw_fitted_text(
+        draw,
+        (206, 500, 748, 564),
+        "and weather rules in one plan.",
+        fill="#d7e4cf",
+        start_size=32,
+        min_size=24,
+    )
+
+    _draw_fitted_text(
+        draw,
+        (928, 194, 1712, 282),
+        "AI garden demo",
+        fill="#173024",
+        start_size=54,
+        min_size=36,
+        bold=True,
+    )
+    _draw_fitted_text(
+        draw,
+        (928, 304, 1656, 364),
+        "Editable care plan from a photo.",
+        fill="#2f5a3e",
+        start_size=32,
+        min_size=24,
+    )
+    _draw_fitted_text(
+        draw,
+        (928, 374, 1692, 434),
+        "Grounded in local baselines and weather.",
+        fill="#2f5a3e",
+        start_size=30,
+        min_size=22,
     )
 
     draw.rounded_rectangle(
-        [116, 770, WIDTH - 116, 912],
-        radius=30,
+        [172, 760, 1740, 942],
+        radius=26,
         fill="#f6f0e4",
         outline="#c7b89a",
         width=3,
     )
-    _multiline_center(
-        draw,
-        (150, 790, WIDTH - 150, 892),
-        "\n".join(END_CARD_LINES[:2]),
-        body_font,
-        fill="#173024",
-        spacing=14,
-    )
-    draw.text((WIDTH / 2 - 410, 878), END_CARD_LINES[2], font=url_font, fill="#2f5a3e")
-    draw.text((WIDTH / 2 - 180, 916), END_CARD_LINES[3], font=footer_font, fill="#6b5c45")
+    footer_rows = [
+        (END_CARD_LINES[0], (208, 786, 1704, 826), 30),
+        (END_CARD_LINES[1], (208, 830, 1704, 868), 30),
+        (END_CARD_LINES[2], (208, 872, 1704, 900), 24),
+        (END_CARD_LINES[3], (208, 902, 1704, 932), 22),
+    ]
+    for text, box, size in footer_rows:
+        _draw_fitted_text(
+            draw,
+            box,
+            text,
+            fill="#173024",
+            start_size=size,
+            min_size=18,
+            center=True,
+            bold=text == END_CARD_LINES[0],
+        )
     return image
 
 
@@ -249,46 +355,88 @@ def render_thumbnail() -> Image.Image:
     draw = ImageDraw.Draw(image)
     draw.rectangle([0, 0, WIDTH, HEIGHT], fill="#223f2f")
     draw.rounded_rectangle([78, 78, WIDTH - 78, HEIGHT - 78], radius=52, fill="#f7f2e8")
-    draw.rounded_rectangle([120, 120, 820, 960], radius=44, fill="#173024")
-    draw.rounded_rectangle([876, 120, WIDTH - 120, 960], radius=44, fill="#dbe7d2")
+    draw.rounded_rectangle([120, 120, 760, 960], radius=44, fill="#173024")
+    draw.rounded_rectangle([820, 120, WIDTH - 120, 960], radius=44, fill="#dbe7d2")
     _draw_leaf_mark(draw, (178, 198))
 
-    title_font = _load_font(96, bold=True)
-    subtitle_font = _load_font(46)
-    badge_font = _load_font(32, bold=True)
-    small_font = _load_font(28)
-
-    draw.text((178, 520), "Waterleaf", font=title_font, fill="#f6f0e4")
-    draw.text((180, 648), "Photo to plant plan", font=subtitle_font, fill="#d7e4cf")
-
-    draw.rounded_rectangle([180, 760, 620, 860], radius=26, fill="#6da66a")
-    draw.text((228, 788), "Gemma 4 + GBIF + Weather", font=badge_font, fill="#173024")
-    draw.text((930, 214), "AI garden demo", font=subtitle_font, fill="#173024")
-    draw.text(
-        (930, 314),
-        "Editable care plan from a single photo.",
-        font=small_font,
-        fill="#2f5a3e",
+    _draw_fitted_text(
+        draw,
+        (170, 500, 694, 620),
+        "Waterleaf",
+        fill="#f6f0e4",
+        start_size=100,
+        min_size=70,
+        bold=True,
     )
-    draw.text(
-        (930, 380),
-        "Built for the Hackathon submission.",
-        font=small_font,
+    _draw_fitted_text(
+        draw,
+        (170, 630, 680, 700),
+        "Photo to plant plan",
+        fill="#d7e4cf",
+        start_size=44,
+        min_size=32,
+    )
+
+    draw.rounded_rectangle([168, 758, 652, 862], radius=26, fill="#6da66a")
+    _draw_fitted_text(
+        draw,
+        (196, 780, 628, 840),
+        "Gemma 4 + GBIF + Weather",
+        fill="#173024",
+        start_size=32,
+        min_size=22,
+        center=True,
+        bold=True,
+    )
+
+    _draw_fitted_text(
+        draw,
+        (864, 196, 1660, 282),
+        "AI garden demo",
+        fill="#173024",
+        start_size=58,
+        min_size=38,
+        bold=True,
+    )
+    _draw_fitted_text(
+        draw,
+        (864, 312, 1640, 366),
+        "Editable care plan from a single photo.",
         fill="#2f5a3e",
+        start_size=32,
+        min_size=24,
+    )
+    _draw_fitted_text(
+        draw,
+        (864, 376, 1644, 430),
+        "Visible traits, local baselines, and weather.",
+        fill="#2f5a3e",
+        start_size=30,
+        min_size=22,
     )
     draw.rounded_rectangle(
-        [930, 480, 1600, 808],
-        radius=34,
+        [864, 486, 1656, 808],
+        radius=36,
         outline="#89a97b",
         width=5,
         fill="#f6f0e4",
     )
-    draw.text((985, 554), "Suggestion engine", font=badge_font, fill="#173024")
-    draw.text(
-        (985, 625),
-        "Local vision, care rules, and weather-aware planning.",
-        font=small_font,
+    _draw_fitted_text(
+        draw,
+        (914, 548, 1606, 628),
+        "Suggestion engine",
         fill="#173024",
+        start_size=40,
+        min_size=28,
+        bold=True,
+    )
+    _draw_fitted_text(
+        draw,
+        (914, 642, 1582, 724),
+        "Local vision, care rules, and weather-aware planning.",
+        fill="#173024",
+        start_size=30,
+        min_size=20,
     )
     return image
 
@@ -315,11 +463,11 @@ def write_static_assets(output_directory: str | Path) -> dict[str, Path]:
     }
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Generate Waterleaf hackathon submission assets.")
     parser.add_argument("--out", type=Path, default=Path("artifacts/submission"))
     parser.add_argument("--voice", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     outputs = write_static_assets(args.out)
     for name, path in outputs.items():
