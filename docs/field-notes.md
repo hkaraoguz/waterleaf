@@ -161,7 +161,7 @@ Currently verified facts:
 
 - the public Space root returned HTTP 200
 - the public `/health` endpoint returned HTTP 200 and `{"status":"ok"}`
-- `uv run --group demo pytest -q` passes 72 tests on this branch
+- `uv run --group demo pytest -q` passes 73 tests on this branch
 - `uv run ruff check .` is clean
 
 Those tests cover the system categories that matter for the current claims:

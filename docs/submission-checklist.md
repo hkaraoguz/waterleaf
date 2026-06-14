@@ -9,7 +9,7 @@
 - [x] approved 30-sec design
 - [x] approved LinkedIn/Field Notes positioning
 - [ ] licensed image/attribution
-- [x] run complete tests/Ruff (72 tests, current fact)
+- [x] run complete tests/Ruff (73 tests, current fact)
 - [ ] capture live end-to-end
 - [ ] generate AI narration/captions/card/thumbnail
 - [ ] assemble/validate MP4
