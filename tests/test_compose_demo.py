@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
+import imageio_ffmpeg
 import pytest
 
 from scripts.compose_demo import (
@@ -21,6 +23,38 @@ from scripts.compose_demo import (
 
 def _filter_complex(command: list[str]) -> str:
     return command[command.index("-filter_complex") + 1]
+
+
+def _decode_video_duration_seconds(path: Path) -> float:
+    result = subprocess.run(
+        [
+            imageio_ffmpeg.get_ffmpeg_exe(),
+            "-hide_banner",
+            "-i",
+            str(path),
+            "-map",
+            "0:v:0",
+            "-f",
+            "null",
+            "-",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    matches = re.findall(r"time=(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)", result.stderr)
+    assert matches, result.stderr
+    hours, minutes, seconds = matches[-1]
+    return (int(hours) * 3600) + (int(minutes) * 60) + float(seconds)
+
+
+def _write_required_inputs(raw_directory: Path, assets_directory: Path) -> None:
+    raw_directory.mkdir()
+    assets_directory.mkdir()
+    for name, _ in RAW_CLIPS:
+        (raw_directory / name).write_bytes(b"clip")
+    for name in ("waterleaf-end-card.png", "waterleaf-voiceover.mp3", "waterleaf-demo.srt"):
+        (assets_directory / name).write_bytes(b"asset")
 
 
 def test_compose_command_uses_approved_timeline_and_codecs(tmp_path: Path):
@@ -71,8 +105,10 @@ def test_compose_command_uses_approved_timeline_and_codecs(tmp_path: Path):
 
     for index, duration in enumerate((4, 7, 8, 7, 4)):
         assert (
-            f"[{index}:v]trim=duration={duration},"
+            f"[{index}:v]tpad=stop_mode=clone:stop_duration={duration},"
+            f"trim=duration={duration},"
             "setpts=PTS-STARTPTS,"
+            "setsar=1,"
             "scale=1920:1080:force_original_aspect_ratio=decrease,"
             "pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0x14241a,"
             "fps=30,format=yuv420p"
@@ -112,9 +148,52 @@ def test_subtitle_filter_escapes_filename_and_style_for_ffmpeg(tmp_path: Path):
     assert _subtitle_filter(subtitle_path) == expected
 
 
-def test_subtitle_filter_handles_special_characters_with_bundled_ffmpeg(tmp_path: Path):
-    imageio_ffmpeg = pytest.importorskip("imageio_ffmpeg")
-    assets_directory = tmp_path / "odd'folder:clip\\take"
+@pytest.mark.parametrize(
+    ("relative_dir", "expected_fragment"),
+    [
+        ("comma,dir", "comma\\,dir"),
+        ("semi;dir", "semi\\;dir"),
+        ("left[dir", "left\\[dir"),
+        ("right]dir", "right\\]dir"),
+        (
+            "mix,;[]'colon:back\\slash",
+            "mix\\,\\;\\[\\]\\\\\\'colon\\\\:back\\\\\\\\slash",
+        ),
+    ],
+)
+def test_subtitle_filter_escapes_filtergraph_punctuation(
+    tmp_path: Path,
+    relative_dir: str,
+    expected_fragment: str,
+):
+    subtitle_path = tmp_path / relative_dir / "waterleaf-demo.srt"
+
+    expected = (
+        "subtitles=filename="
+        f"{tmp_path}/{expected_fragment}/waterleaf-demo.srt:"
+        "force_style='FontName=Arial\\,FontSize=30\\,"
+        "PrimaryColour=&H00FFFFFF\\,OutlineColour=&H00000000\\,"
+        "BorderStyle=1\\,Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'"
+    )
+
+    assert _subtitle_filter(subtitle_path) == expected
+
+
+@pytest.mark.parametrize(
+    "relative_dir",
+    [
+        "comma,dir",
+        "semi;dir",
+        "left[dir",
+        "right]dir",
+        "mix,;[]'colon:back\\slash",
+    ],
+)
+def test_subtitle_filter_handles_special_characters_with_bundled_ffmpeg(
+    tmp_path: Path,
+    relative_dir: str,
+):
+    assets_directory = tmp_path / relative_dir
     try:
         assets_directory.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
@@ -151,6 +230,91 @@ def test_subtitle_filter_handles_special_characters_with_bundled_ffmpeg(tmp_path
     assert output.is_file()
 
 
+def test_bundled_ffmpeg_concat_succeeds_with_heterogeneous_sar(tmp_path: Path):
+    output = tmp_path / "joined.mp4"
+    result = subprocess.run(
+        [
+            imageio_ffmpeg.get_ffmpeg_exe(),
+            "-y",
+            "-hide_banner",
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc=size=160x90:rate=30:d=1,setsar=1",
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=30:d=1,setsar=2",
+            "-filter_complex",
+            (
+                "[0:v]tpad=stop_mode=clone:stop_duration=1,trim=duration=1,"
+                "setpts=PTS-STARTPTS,setsar=1,scale=160:90:force_original_aspect_ratio=decrease,"
+                "pad=160:90:(ow-iw)/2:(oh-ih)/2:color=0x14241a,fps=30,format=yuv420p[v0];"
+                "[1:v]tpad=stop_mode=clone:stop_duration=1,trim=duration=1,"
+                "setpts=PTS-STARTPTS,setsar=1,scale=160:90:force_original_aspect_ratio=decrease,"
+                "pad=160:90:(ow-iw)/2:(oh-ih)/2:color=0x14241a,fps=30,format=yuv420p[v1];"
+                "[v0][v1]concat=n=2:v=1:a=0[v]"
+            ),
+            "-map",
+            "[v]",
+            "-frames:v",
+            "60",
+            str(output),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert output.is_file()
+
+
+def test_bundled_ffmpeg_clones_short_video_to_requested_duration(tmp_path: Path):
+    output = tmp_path / "short-padded.mp4"
+    result = subprocess.run(
+        [
+            imageio_ffmpeg.get_ffmpeg_exe(),
+            "-y",
+            "-hide_banner",
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc=size=320x240:rate=30:d=1",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=r=48000:cl=stereo:d=4",
+            "-filter_complex",
+            (
+                "[0:v]tpad=stop_mode=clone:stop_duration=4,trim=duration=4,"
+                "setpts=PTS-STARTPTS,setsar=1,scale=320:240:force_original_aspect_ratio=decrease,"
+                "pad=320:240:(ow-iw)/2:(oh-ih)/2:color=0x14241a,fps=30,format=yuv420p[v]"
+            ),
+            "-map",
+            "[v]",
+            "-map",
+            "1:a:0",
+            "-t",
+            "4",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            str(output),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert output.is_file()
+    assert _decode_video_duration_seconds(output) == pytest.approx(4.0, abs=0.2)
+
+
 def test_parse_probe_reads_duration_and_codecs():
     probe = parse_probe(
         """
@@ -164,8 +328,18 @@ def test_parse_probe_reads_duration_and_codecs():
 
 
 def test_parse_probe_rejects_missing_duration_and_detects_missing_codecs():
-    with pytest.raises(ValueError, match="duration"):
-        parse_probe("Stream #0:0: Video: h264")
+    with pytest.raises(ValueError, match="Last output: .*Impossible to open.*demo\\.mp4"):
+        parse_probe(
+            "\n".join(
+                [
+                    "ffmpeg version 7.1",
+                    "Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'demo.mp4':",
+                    "  Metadata:",
+                    "  moov atom not found",
+                    "Impossible to open 'demo.mp4'",
+                ]
+            )
+        )
 
     probe = parse_probe(
         """
@@ -254,13 +428,7 @@ def test_cli_happy_path_validates_voiceover_and_output(
     raw_directory = tmp_path / "raw"
     assets_directory = tmp_path / "assets"
     output = tmp_path / "nested" / "waterleaf-demo.mp4"
-    raw_directory.mkdir()
-    assets_directory.mkdir()
-
-    for name, _ in RAW_CLIPS:
-        (raw_directory / name).write_bytes(b"clip")
-    for name in ("waterleaf-end-card.png", "waterleaf-voiceover.mp3", "waterleaf-demo.srt"):
-        (assets_directory / name).write_bytes(b"asset")
+    _write_required_inputs(raw_directory, assets_directory)
 
     seen = {"ffmpeg": None, "probe_paths": [], "command": None}
 
@@ -276,6 +444,7 @@ def test_cli_happy_path_validates_voiceover_and_output(
 
     def fake_run(command: list[str], check: bool) -> None:
         seen["command"] = (command, check)
+        Path(command[-1]).write_bytes(b"rendered")
 
     monkeypatch.setattr("scripts.compose_demo.locate_ffmpeg", fake_locate_ffmpeg)
     monkeypatch.setattr("scripts.compose_demo.probe_media", fake_probe_media)
@@ -296,8 +465,12 @@ def test_cli_happy_path_validates_voiceover_and_output(
     main()
 
     assert output.parent.is_dir()
+    assert output.read_bytes() == b"rendered"
     assert seen["ffmpeg"] == "/tmp/ffmpeg"
-    assert seen["probe_paths"] == [assets_directory / "waterleaf-voiceover.mp3", output]
+    assert seen["probe_paths"] == [
+        assets_directory / "waterleaf-voiceover.mp3",
+        output.with_suffix(".tmp.mp4"),
+    ]
     assert seen["command"] is not None
     command, check = seen["command"]
     assert check is True
@@ -305,6 +478,60 @@ def test_cli_happy_path_validates_voiceover_and_output(
         ffmpeg="/tmp/ffmpeg",
         raw_directory=raw_directory,
         assets_directory=assets_directory,
-        output=output,
+        output=output.with_suffix(".tmp.mp4"),
     )
+    assert not output.with_suffix(".tmp.mp4").exists()
     assert capsys.readouterr().out == f"validated: {output} (30.00s, H.264, AAC)\n"
+
+
+@pytest.mark.parametrize("failure_mode", ["subprocess", "validation"])
+def test_cli_failure_preserves_existing_output_and_cleans_temp(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    failure_mode: str,
+):
+    raw_directory = tmp_path / "raw"
+    assets_directory = tmp_path / "assets"
+    output = tmp_path / "nested" / "waterleaf-demo.mp4"
+    _write_required_inputs(raw_directory, assets_directory)
+    output.parent.mkdir(parents=True)
+    output.write_bytes(b"existing-valid-output")
+    temp_output = output.with_suffix(".tmp.mp4")
+
+    def fake_locate_ffmpeg() -> str:
+        return "/tmp/ffmpeg"
+
+    def fake_probe_media(ffmpeg: str, path: Path) -> MediaProbe:
+        if path.name == "waterleaf-voiceover.mp3":
+            return MediaProbe(28.0, has_h264=False, has_aac=False)
+        if failure_mode == "validation":
+            return MediaProbe(31.0, has_h264=True, has_aac=True)
+        raise AssertionError("probe_media should not validate temp output after subprocess failure")
+
+    def fake_run(command: list[str], check: bool) -> None:
+        Path(command[-1]).write_bytes(b"temp-render")
+        if failure_mode == "subprocess":
+            raise subprocess.CalledProcessError(returncode=1, cmd=command)
+
+    monkeypatch.setattr("scripts.compose_demo.locate_ffmpeg", fake_locate_ffmpeg)
+    monkeypatch.setattr("scripts.compose_demo.probe_media", fake_probe_media)
+    monkeypatch.setattr("scripts.compose_demo.subprocess.run", fake_run)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "compose_demo.py",
+            "--raw-dir",
+            str(raw_directory),
+            "--assets-dir",
+            str(assets_directory),
+            "--output",
+            str(output),
+        ],
+    )
+
+    expected = subprocess.CalledProcessError if failure_mode == "subprocess" else ValueError
+    with pytest.raises(expected):
+        main()
+
+    assert output.read_bytes() == b"existing-valid-output"
+    assert not temp_output.exists()
