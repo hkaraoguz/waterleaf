@@ -1,9 +1,9 @@
 # Submission Checklist
 
 - [x] Deploy Modal service and record its protected endpoint.
-- [ ] Create Modal proxy-auth token and add credentials as Space secrets.
+- [x] Create Modal proxy-auth token and add credentials as Space secrets.
 - [x] Create and mount an HF Storage Bucket at `/data`.
-- [ ] Add `PERENUAL_API_KEY`, `MODAL_ENDPOINT`, `MODAL_KEY`, and `MODAL_SECRET`.
+- [x] Add `PERENUAL_API_KEY`, `MODAL_ENDPOINT`, `MODAL_KEY`, and `MODAL_SECRET`.
 - [x] Deploy the Docker Space as `build-small-hackathon/waterleaf`.
 - [ ] Run at least 20 labeled real-garden evaluation cases.
 - [ ] Test one-, two-, and three-photo live inference.

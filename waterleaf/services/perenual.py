@@ -46,33 +46,27 @@ class PerenualClient:
         if scientific_name in self._cache:
             return CareProfile.model_validate(self._cache[scientific_name])
         if not self.api_key:
-            profile = DEMO_CARE.get(scientific_name) or CareProfile(
-                scientific_name=scientific_name,
-                common_name=scientific_name,
-            )
-            self._remember(scientific_name, profile)
-            return profile
+            return self._remember_fallback(scientific_name)
 
-        search = self.http_client.get(
-            f"{self.base_url}/species-list",
-            params={"key": self.api_key, "q": scientific_name},
-        )
-        search.raise_for_status()
-        entries = search.json().get("data", [])
-        if not entries:
-            profile = CareProfile(
-                scientific_name=scientific_name,
-                common_name=scientific_name,
+        try:
+            search = self.http_client.get(
+                f"{self.base_url}/species-list",
+                params={"key": self.api_key, "q": scientific_name},
             )
-            self._remember(scientific_name, profile)
-            return profile
+            search.raise_for_status()
+            entries = search.json().get("data", [])
+            if not entries:
+                return self._remember_fallback(scientific_name)
 
-        details = self.http_client.get(
-            f"{self.base_url}/species/details/{entries[0]['id']}",
-            params={"key": self.api_key},
-        )
-        details.raise_for_status()
-        payload = details.json()
+            details = self.http_client.get(
+                f"{self.base_url}/species/details/{entries[0]['id']}",
+                params={"key": self.api_key},
+            )
+            details.raise_for_status()
+            payload = details.json()
+        except (httpx.HTTPError, KeyError, TypeError, ValueError):
+            return self._remember_fallback(scientific_name)
+
         min_days, max_days = _parse_benchmark(payload.get("watering_general_benchmark"))
         scientific = payload.get("scientific_name") or [scientific_name]
         profile = CareProfile(
@@ -82,6 +76,14 @@ class PerenualClient:
             max_days=max_days,
             watering_label=payload.get("watering") or "",
             sunlight=payload.get("sunlight") or [],
+        )
+        self._remember(scientific_name, profile)
+        return profile
+
+    def _remember_fallback(self, scientific_name: str) -> CareProfile:
+        profile = DEMO_CARE.get(scientific_name) or CareProfile(
+            scientific_name=scientific_name,
+            common_name=scientific_name,
         )
         self._remember(scientific_name, profile)
         return profile
@@ -116,4 +118,3 @@ def _parse_benchmark(payload: dict | None) -> tuple[int | None, int | None]:
         except ValueError:
             return None, None
     return None, None
-
