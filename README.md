@@ -8,7 +8,7 @@ app_port: 7860
 hf_oauth: true
 hf_oauth_expiration_minutes: 43200
 license: mit
-short_description: Identify garden plants and build weather-aware watering calendars
+short_description: Plant ID and weather-aware watering calendars
 tags:
   - track:backyard
   - sponsor:modal
