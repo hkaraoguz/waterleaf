@@ -1,12 +1,13 @@
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from scripts.submission_assets import (
     CAPTION_CUES,
     END_CARD_LINES,
     VOICEOVER,
     CaptionCue,
+    _load_font,
     generate_voiceover,
     main,
     render_end_card,
@@ -200,6 +201,21 @@ def test_generate_voiceover_uses_owned_and_injected_clients(monkeypatch, tmp_pat
     ]
 
 
+def test_font_fallback_scales_when_no_candidates(monkeypatch):
+    monkeypatch.setattr("scripts.submission_assets._font_candidates", lambda: [])
+
+    canvas = Image.new("RGB", (400, 200), "white")
+    draw = ImageDraw.Draw(canvas)
+
+    small_font = _load_font(18)
+    large_font = _load_font(48)
+    small_bbox = draw.textbbox((0, 0), "Waterleaf", font=small_font)
+    large_bbox = draw.textbbox((0, 0), "Waterleaf", font=large_font)
+
+    assert (large_bbox[3] - large_bbox[1]) > (small_bbox[3] - small_bbox[1]) * 1.5
+    assert (large_bbox[2] - large_bbox[0]) > (small_bbox[2] - small_bbox[0]) * 1.5
+
+
 def test_font_fallback_and_static_asset_rendering_without_candidates(monkeypatch, tmp_path):
     monkeypatch.setattr("scripts.submission_assets._font_candidates", lambda: [])
 
@@ -273,6 +289,13 @@ def test_cli_writes_safe_static_output_and_voiceover(monkeypatch, tmp_path, caps
 
 
 def test_cli_requires_key_for_voice(monkeypatch, tmp_path):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    called = {"generate": False}
+
+    def fake_generate_voiceover(*args, **kwargs):
+        called["generate"] = True
+        raise AssertionError("generate_voiceover should not be called without a key")
+
     monkeypatch.setattr(
         "scripts.submission_assets.write_static_assets",
         lambda output_directory: {
@@ -282,6 +305,7 @@ def test_cli_requires_key_for_voice(monkeypatch, tmp_path):
             "thumbnail": Path(output_directory) / "waterleaf-thumbnail.png",
         },
     )
+    monkeypatch.setattr("scripts.submission_assets.generate_voiceover", fake_generate_voiceover)
 
     try:
         main(["--out", str(tmp_path), "--voice"])
@@ -289,3 +313,29 @@ def test_cli_requires_key_for_voice(monkeypatch, tmp_path):
         assert exc.code == 2
     else:
         raise AssertionError("main() did not exit when OPENAI_API_KEY was missing")
+    assert called["generate"] is False
+
+
+def test_cli_defaults_to_artifacts_submission_and_prints_safe_paths(monkeypatch, capsys):
+    captured = {}
+
+    def fake_write_static_assets(output_directory):
+        captured["output_directory"] = Path(output_directory)
+        return {
+            "script": Path("artifacts/submission/waterleaf-voiceover.txt"),
+            "captions": Path("artifacts/submission/waterleaf-demo.srt"),
+            "end_card": Path("artifacts/submission/waterleaf-end-card.png"),
+            "thumbnail": Path("artifacts/submission/waterleaf-thumbnail.png"),
+        }
+
+    monkeypatch.setattr("scripts.submission_assets.write_static_assets", fake_write_static_assets)
+
+    main([])
+
+    assert captured["output_directory"] == Path("artifacts/submission")
+    assert capsys.readouterr().out.strip().splitlines() == [
+        "script: artifacts/submission/waterleaf-voiceover.txt",
+        "captions: artifacts/submission/waterleaf-demo.srt",
+        "end_card: artifacts/submission/waterleaf-end-card.png",
+        "thumbnail: artifacts/submission/waterleaf-thumbnail.png",
+    ]

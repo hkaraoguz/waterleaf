@@ -126,7 +126,10 @@ def _load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageF
                 return ImageFont.truetype(candidate, size=size)
             except OSError:
                 continue
-    return ImageFont.load_default()
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:
+        return ImageFont.load_default()
 
 
 def _measure_text(
@@ -261,11 +264,11 @@ def render_end_card() -> Image.Image:
         outline="#b8c9ae",
         width=3,
     )
-    _draw_leaf_mark(draw, (182, 196))
+    _draw_leaf_mark(draw, (156, 188))
 
     _draw_fitted_text(
         draw,
-        (206, 236, 736, 350),
+        (360, 232, 736, 352),
         "Waterleaf",
         fill="#f6f0e4",
         start_size=80,
