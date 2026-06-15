@@ -1287,7 +1287,7 @@ uv run ruff check .
 Expected:
 
 ```text
-47 passed
+74 passed
 All checks passed!
 ```
 
@@ -1368,7 +1368,7 @@ curl --fail https://build-small-hackathon-waterleaf.hf.space/health
 Expected:
 
 ```text
-47 passed
+74 passed
 All checks passed!
 {"status":"ok"}
 ```
@@ -1408,7 +1408,7 @@ Verified on June 14, 2026.
 
 ## Automated checks
 
-- `uv run pytest -q`: 47 passed.
+- `uv run --group demo pytest -q`: 74 passed.
 - `uv run ruff check .`: all checks passed.
 
 ## Deployment
@@ -1519,8 +1519,7 @@ artifacts/submission/raw/03-plan.mp4
 
 - [ ] **Step 6: Record `04-calendar.mp4`**
 
-Record saving the plant, generating the calendar, showing the event, and
-opening the public profile. Save it as:
+Record the saved plant, generated ICS file, and public profile. Save it as:
 
 ```text
 artifacts/submission/raw/04-calendar.mp4
@@ -1655,7 +1654,7 @@ git status --short
 Expected:
 
 ```text
-47 passed
+74 passed
 All checks passed!
 ```
 
@@ -1825,6 +1824,6 @@ Do not call the submission complete until all of these are true:
 - captions and AI-voice disclosure are present;
 - the sample image attribution is present;
 - all required public links work signed out;
-- 47 tests pass and Ruff is clean;
+- 74 tests pass and Ruff is clean;
 - the checklist reflects only completed facts;
 - the hackathon form contains the verified Space, LinkedIn, and Field Notes URLs.
