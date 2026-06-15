@@ -58,9 +58,9 @@ def _subtitle_filter(path: Path) -> str:
     return (
         "subtitles=filename="
         f"{_escape_subtitle_filename(path)}:"
-        "force_style='FontName=Arial\\,FontSize=30\\,"
+        "force_style='FontName=Arial\\,FontSize=22\\,"
         "PrimaryColour=&H00FFFFFF\\,OutlineColour=&H00000000\\,"
-        "BorderStyle=1\\,Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'"
+        "BorderStyle=1\\,Outline=2\\,Shadow=0\\,MarginV=40\\,Alignment=2'"
     )
 
 
@@ -116,6 +116,8 @@ def compose_command(
             "18",
             "-pix_fmt",
             "yuv420p",
+            "-af",
+            "loudnorm=I=-16:TP=-1.5:LRA=11",
             "-c:a",
             "aac",
             "-b:a",

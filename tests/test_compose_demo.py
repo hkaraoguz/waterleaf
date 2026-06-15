@@ -117,8 +117,8 @@ def test_compose_command_uses_approved_timeline_and_codecs(tmp_path: Path):
 
     assert "[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0[base]" in filter_complex
     assert "subtitles=filename=" in filter_complex
-    assert "force_style='FontName=Arial\\,FontSize=30\\," in filter_complex
-    assert "Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'" in filter_complex
+    assert "force_style='FontName=Arial\\,FontSize=22\\," in filter_complex
+    assert "Outline=2\\,Shadow=0\\,MarginV=40\\,Alignment=2'" in filter_complex
     assert command[command.index("-map") : command.index("-map") + 4] == [
         "-map",
         "[video]",
@@ -130,6 +130,10 @@ def test_compose_command_uses_approved_timeline_and_codecs(tmp_path: Path):
     assert command[output_t_index : output_t_index + 2] == ["-t", str(OUTPUT_SECONDS)]
     assert command[output_r_index : output_r_index + 2] == ["-r", "30"]
     assert "-c:v" in command and command[command.index("-c:v") + 1] == "libx264"
+    assert command[command.index("-af") : command.index("-af") + 2] == [
+        "-af",
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+    ]
     assert "-c:a" in command and command[command.index("-c:a") + 1] == "aac"
     assert command[-1] == str(output)
 
@@ -140,9 +144,9 @@ def test_subtitle_filter_escapes_filename_and_style_for_ffmpeg(tmp_path: Path):
     expected = (
         "subtitles=filename="
         f"{tmp_path}/odd\\\\\\'folder\\\\:clip\\\\\\\\take/waterleaf-demo.srt:"
-        "force_style='FontName=Arial\\,FontSize=30\\,"
+        "force_style='FontName=Arial\\,FontSize=22\\,"
         "PrimaryColour=&H00FFFFFF\\,OutlineColour=&H00000000\\,"
-        "BorderStyle=1\\,Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'"
+        "BorderStyle=1\\,Outline=2\\,Shadow=0\\,MarginV=40\\,Alignment=2'"
     )
 
     assert _subtitle_filter(subtitle_path) == expected
@@ -171,9 +175,9 @@ def test_subtitle_filter_escapes_filtergraph_punctuation(
     expected = (
         "subtitles=filename="
         f"{tmp_path}/{expected_fragment}/waterleaf-demo.srt:"
-        "force_style='FontName=Arial\\,FontSize=30\\,"
+        "force_style='FontName=Arial\\,FontSize=22\\,"
         "PrimaryColour=&H00FFFFFF\\,OutlineColour=&H00000000\\,"
-        "BorderStyle=1\\,Outline=3\\,Shadow=0\\,MarginV=55\\,Alignment=2'"
+        "BorderStyle=1\\,Outline=2\\,Shadow=0\\,MarginV=40\\,Alignment=2'"
     )
 
     assert _subtitle_filter(subtitle_path) == expected
