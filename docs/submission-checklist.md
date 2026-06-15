@@ -8,10 +8,10 @@
 - [x] Space root + health 200
 - [x] approved 30-sec design
 - [x] approved LinkedIn/Field Notes positioning
-- [ ] licensed image/attribution
+- [x] licensed image/attribution
 - [x] run complete tests/Ruff (73 tests, current fact)
 - [ ] capture live end-to-end
-- [ ] generate AI narration/captions/card/thumbnail
+- [x] generate AI narration/captions/card/thumbnail
 - [ ] assemble/validate MP4
 - [ ] watch muted/audio desktop/mobile
 - [ ] upload final repository to Space
