@@ -9,7 +9,7 @@
 - [x] approved 30-sec design
 - [x] approved LinkedIn/Field Notes positioning
 - [x] licensed image/attribution
-- [x] run complete tests/Ruff (73 tests, current fact)
+- [x] run complete tests/Ruff (74 tests, current fact)
 - [x] capture four demo clips
 - [ ] verify signed-in save/export/profile on the deployed Space
 - [x] generate AI narration/captions/card/thumbnail

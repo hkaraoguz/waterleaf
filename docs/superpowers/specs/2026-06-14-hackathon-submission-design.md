@@ -121,8 +121,8 @@ The video must remain understandable during muted autoplay.
 
 #### 0-4 seconds: Outcome hook
 
-Show a calendar reminder beside the lavender photo, then cut or rewind into
-Waterleaf.
+Show the public plant profile with the lavender photo and upcoming watering
+dates, then cut into Waterleaf.
 
 On-screen caption:
 
@@ -159,8 +159,8 @@ Voiceover:
 
 #### 19-26 seconds: Ship the outcome
 
-Save the plant, generate the ICS file, and show a calendar event plus the
-linked public plant profile.
+Show the saved plant card, generated ICS file, and linked public plant
+profile.
 
 Voiceover:
 
@@ -302,7 +302,7 @@ attribution, Space link, repository link, and video link.
 
 - Download and record attribution for the licensed lavender image.
 - Record the five storyboard clips at 1920x1080.
-- Capture the imported or opened calendar event.
+- Capture the generated ICS file.
 - Capture the public plant profile.
 - Create the end card and thumbnail.
 

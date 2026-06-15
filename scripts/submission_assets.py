@@ -62,6 +62,8 @@ END_CARD_LINES = [
     "AI-generated narration",
 ]
 
+THUMBNAIL_DETAIL = "Gemma vision, care rules, and weather-aware planning."
+
 
 def speech_payload() -> dict[str, str]:
     return {
@@ -461,7 +463,7 @@ def render_thumbnail() -> Image.Image:
     _draw_fitted_text(
         draw,
         (914, 642, 1582, 724),
-        "Local vision, care rules, and weather-aware planning.",
+        THUMBNAIL_DETAIL,
         fill="#173024",
         start_size=30,
         min_size=20,

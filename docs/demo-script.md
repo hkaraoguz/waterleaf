@@ -17,23 +17,22 @@ Keep secrets and account menus out of frame.
 ## Raw Clips
 
 1. `artifacts/submission/raw/01-hook.mp4` - 4 sec
-   Calendar reminder beside the licensed lavender image. End with Waterleaf
-   visible.
+   Public plant profile with the licensed lavender image and upcoming watering
+   dates.
 2. `artifacts/submission/raw/02-identify.mp4` - 7 sec
    Licensed image to visible traits and three GBIF-backed matches. Waiting can
    be recorded raw but cut out.
 3. `artifacts/submission/raw/03-plan.mp4` - 8 sec
    Confirm English lavender. Reveal editable dates, reason, and confidence.
 4. `artifacts/submission/raw/04-calendar.mp4` - 7 sec
-   Save the plant, export the ICS, show the calendar event, and open the
-   public profile.
+   Show the saved plant card, generated ICS file, and public profile.
 5. `artifacts/submission/waterleaf-end-card.png` - 4 sec
    Generated end card.
 
 ## Timeline
 
 - `0-4`
-  - Visual: calendar reminder beside the lavender image, then Waterleaf visible.
+  - Visual: public plant profile with the lavender image and upcoming dates.
   - Caption: `Turn a garden photo into a watering plan.`
   - Voice: `A garden photo should become something useful.`
 - `4-11`
@@ -48,8 +47,8 @@ Keep secrets and account menus out of frame.
   - Voice: `...so you make the final call. It combines local care baselines
     with weather rules to create an editable thirty-day plan.`
 - `19-26`
-  - Visual: save the plant, export the ICS, show the calendar event, then open
-    the public plant profile.
+  - Visual: saved plant card, generated ICS file, then the public plant
+    profile.
   - Voice: `Save the plant, export the calendar, and every reminder links back to the photo.`
 - `26-30`
   - Visual: `artifacts/submission/waterleaf-end-card.png`

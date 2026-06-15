@@ -4,7 +4,7 @@ Verified June 15, 2026.
 
 ## Checks
 
-- `uv run --group demo pytest -q`: 73 passed
+- `uv run --group demo pytest -q`: 74 passed
 - `uv run ruff check .`: all checks passed
 
 ## Public Space

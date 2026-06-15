@@ -161,17 +161,18 @@ Currently verified facts:
 
 - the public Space root returned HTTP 200
 - the public `/health` endpoint returned HTTP 200 and `{"status":"ok"}`
-- `uv run --group demo pytest -q` passes 73 tests on this branch
+- `uv run --group demo pytest -q` passes 74 tests on this branch
 - `uv run ruff check .` is clean
 
 Those tests cover the system categories that matter for the current claims:
 constrained multimodal requests, grounded reranking, scheduler behavior and
 forecast fallback, image normalization, owner isolation, public privacy
 boundaries, ICS generation, generated submission assets, and real bundled
-FFmpeg edge cases. What I have not yet verified in a way that belongs in this
-report is a fresh live end-to-end demo capture of upload, confirmation, save,
-export, calendar event, and public profile. That evidence should be added only
-after it exists.
+FFmpeg edge cases. The deployed Space has also completed a fresh guest run
+through upload, visual analysis, GBIF candidate confirmation, and schedule
+preview. Save, ICS export, and public-profile footage was captured from the
+same application code with isolated local data. A deployed OAuth
+save/export/profile run remains pending and is not claimed here.
 
 ## What Waterleaf does not claim
 
@@ -224,9 +225,9 @@ export that still carries the original image context forward.
 
 The current demo plan is in [demo-script.md](demo-script.md). The public
 LinkedIn video URL is an external publication dependency and will be added in
-the release verification step after the video is published. Selected screen
-captures are produced during the final demo recording pass; they are not yet
-evidence in this report.
+the release verification step after the video is published. The verified
+capture sources, final media properties, and deployed-versus-local boundary
+are recorded in [submission-evidence.md](submission-evidence.md).
 
 ## Demo image attribution
 

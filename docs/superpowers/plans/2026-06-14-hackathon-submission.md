@@ -912,8 +912,7 @@ composition script trims it.
 
 1. `artifacts/submission/raw/01-hook.mp4`
    - Final duration: 4 seconds
-   - Show the calendar reminder beside the lavender image.
-   - End with Waterleaf visible so the next cut feels like a rewind.
+   - Show the public plant profile with the lavender image and upcoming dates.
 2. `artifacts/submission/raw/02-identify.mp4`
    - Final duration: 7 seconds
    - Show the licensed lavender image in Waterleaf.
@@ -924,8 +923,8 @@ composition script trims it.
    - Reveal editable 30-day dates and the reason/confidence columns.
 4. `artifacts/submission/raw/04-calendar.mp4`
    - Final duration: 7 seconds
-   - Save the plant, generate the ICS, show the calendar event, and open the
-     linked public plant profile.
+   - Show the saved plant card, generated ICS, and linked public plant
+     profile.
 
 The final four seconds use the generated
 `artifacts/submission/waterleaf-end-card.png`.
@@ -934,7 +933,7 @@ The final four seconds use the generated
 
 ### 0-4 seconds
 
-Visual: calendar reminder and source plant image.
+Visual: public plant profile with source image and upcoming dates.
 
 Caption: `Turn a garden photo into a watering plan.`
 
@@ -958,7 +957,7 @@ weather rules to create an editable thirty-day plan.`
 
 ### 19-26 seconds
 
-Visual: save, export, calendar reminder, and public plant profile.
+Visual: saved plant card, generated ICS, and public plant profile.
 
 Voice: `Save the plant, export the calendar, and every reminder links back to
 the photo.`
@@ -1147,8 +1146,9 @@ At submission time:
 - tests covered constrained multimodal requests, grounded reranking,
   deterministic scheduling, forecast fallback, image normalization, owner
   isolation, public privacy boundaries, ICS generation, and submission assets;
-- one live end-to-end flow was captured for the demo: identify, confirm,
-  preview, save, export, calendar event, and public profile.
+- the deployed guest flow was captured through identify, confirm, and preview;
+- save, export, and public-profile footage was captured from the same
+  application code with isolated local data.
 
 I did not complete a real labeled identification benchmark before the required
 submission assets. I therefore do not publish an accuracy number. I also do not
@@ -1488,7 +1488,8 @@ Before recording:
 
 - [ ] **Step 3: Record `01-hook.mp4`**
 
-Record the calendar reminder and lavender visual for at least five seconds.
+Record the public plant profile with the lavender visual and upcoming watering
+dates for at least five seconds.
 Save it as:
 
 ```text

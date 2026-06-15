@@ -8,6 +8,7 @@ from scripts.submission_assets import (
     END_CARD_LEAF_MARK_ORIGIN,
     END_CARD_LINES,
     END_CARD_TITLE_BOX,
+    THUMBNAIL_DETAIL,
     VOICEOVER,
     CaptionCue,
     _draw_fitted_text,
@@ -108,6 +109,12 @@ def test_end_card_lines_and_speech_payload_are_exact():
             "and `links back to the photo`; Do not add or remove words."
         ),
     }
+
+
+def test_thumbnail_does_not_claim_local_inference():
+    assert THUMBNAIL_DETAIL == (
+        "Gemma vision, care rules, and weather-aware planning."
+    )
 
 
 def test_generate_voiceover_uses_owned_and_injected_clients(monkeypatch, tmp_path):
