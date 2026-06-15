@@ -23,6 +23,16 @@ Verified June 14, 2026.
 {"status":"ok"}
 ```
 
+## Licensed Demo Input
+
+- File: `assets/demo/lavender-garden-brooke-balentine.jpg`
+- Format and dimensions: JPEG, 1920x2880
+- Photographer: Brooke Balentine
+- Source:
+  <https://unsplash.com/photos/lavender-plants-growing-in-a-garden-o-8pxOIAJcg>
+- License: Unsplash License
+- Attribution record: [ATTRIBUTION.md](../assets/demo/ATTRIBUTION.md)
+
 ## Claim Boundaries
 
 - Waterleaf can claim Llama Champion.
