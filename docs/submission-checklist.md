@@ -10,10 +10,11 @@
 - [x] approved LinkedIn/Field Notes positioning
 - [x] licensed image/attribution
 - [x] run complete tests/Ruff (73 tests, current fact)
-- [ ] capture live end-to-end
+- [x] capture four demo clips
+- [ ] verify signed-in save/export/profile on the deployed Space
 - [x] generate AI narration/captions/card/thumbnail
-- [ ] assemble/validate MP4
-- [ ] watch muted/audio desktop/mobile
+- [x] assemble/validate MP4
+- [x] watch muted/audio desktop/mobile
 - [ ] upload final repository to Space
 - [ ] verify Field Notes signed-out
 - [ ] publish LinkedIn post

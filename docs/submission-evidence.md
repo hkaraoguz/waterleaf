@@ -55,6 +55,16 @@ records the stable ordering and workflow result rather than a fixed score.
 - Captions: five burned-caption cues covering 0-30 seconds
 - End card: 1920x1080 PNG
 - Thumbnail: 1920x1080 PNG
+- Demo master: 29.83 seconds, 1920x1080, 30 fps, H.264/AAC MP4
+- Demo audio: -15.9 LUFS integrated, -1.4 dBTP true peak
+- Final soundtrack transcription matched the approved script at 98.5%;
+  the only difference was transcribing `thirty` as `30`.
+
+The demo uses deployed-Space captures for guest image analysis, GBIF candidate
+confirmation, and Stockholm schedule preview. Save, ICS export, and public
+profile footage was captured from the same application code in an isolated
+local data directory because CLI authentication does not create a browser
+Hugging Face OAuth profile.
 
 ## Claim Boundaries
 
@@ -70,5 +80,3 @@ records the stable ordering and workflow result rather than a fixed score.
 A fresh signed-in save/export/profile flow is still pending. It will be
 recorded and added here only after live verification. This file does not yet
 claim that the authenticated workflow is complete.
-
-Task 4 will update this file after live proof.
