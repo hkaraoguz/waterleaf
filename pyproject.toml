@@ -20,9 +20,6 @@ dev = [
   "pytest-cov>=6,<8",
   "ruff>=0.11,<1",
 ]
-demo = [
-  "imageio-ffmpeg>=0.6,<1",
-]
 deploy = [
   "modal>=1.1,<2",
 ]

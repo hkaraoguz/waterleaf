@@ -161,17 +161,16 @@ Currently verified facts:
 
 - the public Space root returned HTTP 200
 - the public `/health` endpoint returned HTTP 200 and `{"status":"ok"}`
-- `uv run --group demo pytest -q` passes 74 tests on this branch
+- all 40 tracked application tests pass
 - `uv run ruff check .` is clean
 
 Those tests cover the system categories that matter for the current claims:
 constrained multimodal requests, grounded reranking, scheduler behavior and
 forecast fallback, image normalization, owner isolation, public privacy
-boundaries, ICS generation, generated submission assets, and real bundled
-FFmpeg edge cases. The deployed Space has also completed a fresh guest run
-through upload, visual analysis, GBIF candidate confirmation, and schedule
-preview. Save, ICS export, and public-profile footage was captured from the
-same application code with isolated local data. A deployed OAuth
+boundaries, and ICS generation. The deployed Space has also completed a fresh
+guest run through upload, visual analysis, GBIF candidate confirmation, and
+schedule preview. Save, ICS export, and public-profile footage was captured
+from the same application code with isolated local data. A deployed OAuth
 save/export/profile run remains pending and is not claimed here.
 
 ## What Waterleaf does not claim
@@ -218,16 +217,16 @@ export that still carries the original image context forward.
 
 - Space: <https://huggingface.co/spaces/build-small-hackathon/waterleaf>
 - Source: <https://github.com/hkaraoguz/waterleaf>
+- Demo: <https://www.youtube.com/watch?v=4H5vGVFcaO4>
+- Social post: <https://x.com/hknkrgz/status/2066605985741807972>
 - Architecture: [architecture.md](architecture.md)
-- Demo script: [demo-script.md](demo-script.md)
 
 ## Demo
 
-The current demo plan is in [demo-script.md](demo-script.md). The public
-LinkedIn video URL is an external publication dependency and will be added in
-the release verification step after the video is published. The verified
-capture sources, final media properties, and deployed-versus-local boundary
-are recorded in [submission-evidence.md](submission-evidence.md).
+The public 30-second demo is available on
+[YouTube](https://www.youtube.com/watch?v=4H5vGVFcaO4), and the accompanying
+social post is available on
+[X](https://x.com/hknkrgz/status/2066605985741807972).
 
 ## Demo image attribution
 

@@ -14,6 +14,8 @@ tags:
   - sponsor:modal
   - sponsor:openai
   - achievement:llama
+  - achievement:fieldnotes
+  - achievement:bestdemo
 ---
 
 # Waterleaf
@@ -67,13 +69,10 @@ deterministic lavender demo identifier. Local persistence uses the
 Run checks:
 
 ```bash
-uv sync --group demo
-uv run --group demo pytest
+uv sync
+uv run pytest
 uv run ruff check .
 ```
-
-The `demo` group installs bundled FFmpeg support for the submission-media
-integration tests, which import `imageio-ffmpeg`.
 
 ## Modal Deployment
 
@@ -269,15 +268,18 @@ available at `scripts/smoke_modal.py`.
 
 ## Submission Materials
 
+- [30-second demo video](https://www.youtube.com/watch?v=4H5vGVFcaO4)
+- [X post](https://x.com/hknkrgz/status/2066605985741807972)
 - [Field Notes](docs/field-notes.md)
-- [30-second demo script](docs/demo-script.md)
-- [LinkedIn post](docs/social-post.md)
-- [Submission evidence](docs/submission-evidence.md)
-- [Submission checklist](docs/submission-checklist.md)
+- [Architecture](docs/architecture.md)
 
-Target quests: Backyard AI, Llama Champion, Modal-powered, and Field Notes.
-Waterleaf does not claim Off the Grid because inference, taxonomy, and weather
-are cloud-hosted.
+Target categories: Backyard AI, Best Demo, Llama Champion, Modal-powered, and
+Field Notes. Waterleaf does not claim Off the Grid because inference, taxonomy,
+and weather are cloud-hosted.
+
+## Team
+
+- [Hakan Karaoguz (`hkaraoguz`)](https://huggingface.co/hkaraoguz)
 
 ## Credits
 

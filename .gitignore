@@ -1,18 +1,55 @@
+# Secrets
 .env
 .env.*
 !.env.example
+
+# Operating system and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python environments and caches
 .venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.hypothesis/
+.tox/
+.nox/
 .coverage
+.coverage.*
 htmlcov/
+
+# Build output
 dist/
 build/
 *.egg-info/
-data/
-.superpowers/
 
-# Generated hackathon submission media
-artifacts/submission/
+# Local runtime state
+data/
+*.sqlite3
+*.log
+
+# Local planning and generated submission material
+.superpowers/
+artifacts/
+assets/demo/
+docs/superpowers/
+docs/demo-script.md
+docs/social-post.md
+docs/submission-checklist.md
+docs/submission-evidence.md
+docs/x-post.md
+scripts/compose_demo.py
+scripts/submission_assets.py
+tests/test_compose_demo.py
+tests/test_submission_assets.py
+
+# Local evaluation inputs and results
+evaluation/manifest.csv
+evaluation/results*.json
