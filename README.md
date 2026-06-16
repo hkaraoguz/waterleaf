@@ -41,7 +41,8 @@ Hackathon.
 
 - **UI and web:** Gradio Blocks mounted in FastAPI
 - **Authentication:** Hugging Face OAuth
-- **Persistence:** SQLite and normalized JPEGs on an attached HF Storage Bucket
+- **Persistence:** Local SQLite with an HF Storage Bucket snapshot, plus bucket-backed
+  JPEGs and calendar exports
 - **Vision model:** `ggml-org/gemma-4-26B-A4B-it-GGUF`
 - **Runtime:** llama.cpp `server-cuda13-b9445` on a Modal L4
 - **Taxonomy:** GBIF Species API
@@ -193,8 +194,11 @@ In **Space Settings → Storage Buckets**:
 2. Attach it read-write.
 3. Set the mount path to `/data`.
 
-The Docker image already sets `WATERLEAF_DATA_DIR=/data`. Without this mount,
-saved gardens and images disappear when the Space restarts.
+The Docker image sets `WATERLEAF_DATA_DIR=/data` for bucket-backed media,
+exports, and database snapshots. It keeps the live SQLite file under
+`WATERLEAF_DATABASE_DIR=/tmp/waterleaf-db` so SQLite uses local container disk
+instead of the bucket mount for file locking. Without the bucket mount, images,
+calendar exports, and saved-garden snapshots disappear when the Space restarts.
 
 ### 4. Configure secrets and variables
 
@@ -207,6 +211,7 @@ In **Space Settings → Variables and secrets**, add:
 | `MODAL_SECRET` | Secret | Production | Modal proxy token secret |
 | `PUBLIC_BASE_URL` | Variable | Optional | Override the derived Space URL |
 | `WATERLEAF_DATA_DIR` | Variable | No | Defaults to `/data` in Docker |
+| `WATERLEAF_DATABASE_DIR` | Variable | No | Defaults to `/tmp/waterleaf-db` in Docker |
 
 Use only the base Modal URL for `MODAL_ENDPOINT`; do not append
 `/v1/chat/completions`.

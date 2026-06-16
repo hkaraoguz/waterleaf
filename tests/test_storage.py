@@ -81,3 +81,36 @@ def test_store_replaces_schedule_atomically(tmp_path):
         {"date": "2026-06-14", "reason": "Edited", "confidence": "manual"}
     ]
 
+
+def test_store_uses_local_database_and_syncs_snapshot(tmp_path):
+    snapshot_path = tmp_path / "bucket" / "waterleaf.sqlite3"
+    seed_store = GardenStore(snapshot_path)
+    seed = seed_store.save_plant("alice", _draft())
+    seed_store.replace_schedule(
+        "alice",
+        seed.id,
+        [{"date": "2026-06-14", "reason": "Seed", "confidence": "manual"}],
+    )
+
+    local_path = tmp_path / "local" / "waterleaf.sqlite3"
+    store = GardenStore(local_path, snapshot_path=snapshot_path)
+    saved = store.save_plant("alice", _draft())
+    store.replace_schedule(
+        "alice",
+        saved.id,
+        [{"date": "2026-06-15", "reason": "Synced", "confidence": "manual"}],
+    )
+
+    assert local_path.exists()
+    assert store.get_schedule("alice", seed.id) == [
+        {"date": "2026-06-14", "reason": "Seed", "confidence": "manual"}
+    ]
+
+    reloaded = GardenStore(
+        tmp_path / "reloaded" / "waterleaf.sqlite3",
+        snapshot_path=snapshot_path,
+    )
+    assert {plant.id for plant in reloaded.list_plants("alice")} == {seed.id, saved.id}
+    assert reloaded.get_schedule("alice", saved.id) == [
+        {"date": "2026-06-15", "reason": "Synced", "confidence": "manual"}
+    ]

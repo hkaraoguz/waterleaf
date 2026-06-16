@@ -11,6 +11,19 @@ def test_settings_derive_public_url_from_space_host(monkeypatch, tmp_path):
 
     assert settings.public_base_url == "https://hkaraoguz-waterleaf.hf.space"
     assert settings.database_path == tmp_path / "waterleaf.sqlite3"
+    assert settings.database_snapshot_path is None
+
+
+def test_settings_can_keep_sqlite_database_off_data_mount(monkeypatch, tmp_path):
+    data_dir = tmp_path / "data"
+    database_dir = tmp_path / "db"
+    monkeypatch.setenv("WATERLEAF_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("WATERLEAF_DATABASE_DIR", str(database_dir))
+
+    settings = Settings.from_env()
+
+    assert settings.database_path == database_dir / "waterleaf.sqlite3"
+    assert settings.database_snapshot_path == data_dir / "waterleaf.sqlite3"
 
 
 def test_runtime_uses_demo_identification_without_modal_endpoint(tmp_path):

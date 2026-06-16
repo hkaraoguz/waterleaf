@@ -30,7 +30,7 @@ def build_application(settings: Settings | None = None) -> WaterleafApplication:
         identification = build_demo_identification()
 
     return WaterleafApplication(
-        store=GardenStore(settings.database_path),
+        store=GardenStore(settings.database_path, snapshot_path=settings.database_snapshot_path),
         media_directory=settings.media_directory,
         export_directory=settings.export_directory,
         public_base_url=settings.public_base_url,

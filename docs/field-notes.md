@@ -22,7 +22,7 @@ flowchart LR
     U[Gardener] --> G[Gradio Blocks]
     G --> A[FastAPI application]
     A --> O[Hugging Face OAuth]
-    A --> S[(SQLite + images\nHF Storage Bucket)]
+    A --> S[(Local SQLite\nbucket snapshot + images)]
     A --> M[Modal proxy-auth endpoint]
     M --> L[llama.cpp\nGemma 4 26B-A4B GGUF]
     A --> B[GBIF taxonomy]

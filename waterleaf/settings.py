@@ -12,9 +12,16 @@ class Settings:
     modal_endpoint: str | None
     modal_key: str | None
     modal_secret: str | None
+    database_directory: Path | None = None
 
     @property
     def database_path(self) -> Path:
+        return (self.database_directory or self.data_directory) / "waterleaf.sqlite3"
+
+    @property
+    def database_snapshot_path(self) -> Path | None:
+        if self.database_directory is None or self.database_directory == self.data_directory:
+            return None
         return self.data_directory / "waterleaf.sqlite3"
 
     @property
@@ -28,6 +35,7 @@ class Settings:
     @classmethod
     def from_env(cls) -> Settings:
         data_directory = Path(os.getenv("WATERLEAF_DATA_DIR", "data"))
+        database_directory = os.getenv("WATERLEAF_DATABASE_DIR")
         public_base_url = os.getenv("PUBLIC_BASE_URL")
         if not public_base_url:
             space_host = os.getenv("SPACE_HOST")
@@ -40,4 +48,5 @@ class Settings:
             modal_endpoint=os.getenv("MODAL_ENDPOINT"),
             modal_key=os.getenv("MODAL_KEY"),
             modal_secret=os.getenv("MODAL_SECRET"),
+            database_directory=Path(database_directory) if database_directory else None,
         )

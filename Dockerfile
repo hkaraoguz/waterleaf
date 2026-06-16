@@ -4,7 +4,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    WATERLEAF_DATA_DIR=/data
+    WATERLEAF_DATA_DIR=/data \
+    WATERLEAF_DATABASE_DIR=/tmp/waterleaf-db
 
 RUN pip install --no-cache-dir uv==0.11.8 \
     && useradd --create-home --uid 1000 user \
